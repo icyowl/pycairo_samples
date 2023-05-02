@@ -3,17 +3,32 @@ import math
 import os
 
 def cmykToRgb(c, m, y, k):
-    c=float(c)/100.0
-    m=float(m)/100.0
-    y=float(y)/100.0
-    k=float(k)/100.0
-    r = round(255.0 - ((min(1.0, c * (1.0 - k) + k)) * 255.0))
-    g = round(255.0 - ((min(1.0, m * (1.0 - k) + k)) * 255.0))
-    b = round(255.0 - ((min(1.0, y * (1.0 - k) + k)) * 255.0))
-    # r = round(255.0 * (1-c) * (1-k))
-    # g = round(255.0 * (1-m) * (1-k))
-    # b = round(255.0 * (1-y) * (1-k))
-    return (r,g,b)
+    c = c/100
+    m = m/100
+    y = y/100
+    k = k/100
+    r = round(255 - ((min(1, c * (1 - k) + k)) * 255))
+    g = round(255 - ((min(1, m * (1 - k) + k)) * 255))
+    b = round(255 - ((min(1, y * (1 - k) + k)) * 255))
+
+    return r, g, b
+
+def rgbToCmyk(r, g, b):
+    if (r, g, b) == (0, 0, 0):
+        # black
+        return 0, 0, 0, 100
+
+    c = 1 - r/255
+    m = 1 - g/255
+    y = 1 - b/255
+
+    min_cmy = min(c, m, y)
+    c = 100 * (c - min_cmy) / (1 - min_cmy)
+    m = 100 * (m - min_cmy) / (1 - min_cmy)
+    y = 100 * (y - min_cmy) / (1 - min_cmy)
+    k = 100 * min_cmy 
+
+    return c, m, y, k
 
 WIDTH, HEIGHT = 720, 256
 
@@ -21,6 +36,8 @@ def michiru_colors(filename):
     
     if os.name == "posix":
         fontface = "YuGothic"
+    if os.name == "nt":
+        fontface = "Yu Gothic"
 
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, WIDTH, HEIGHT)
     c = cairo.Context(surface)
