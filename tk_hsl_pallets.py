@@ -15,10 +15,11 @@ for i in range(11):
 
 frame.pack()
 
-for i in range(1, 10):
+for i in range(11):
     lit = i*10
     frame = tk.Frame(root)
-    label = tk.Label(frame, text=f"L={lit}%")
+    text = "L=" + str(lit).rjust(3, " ") + "%"
+    label = tk.Label(frame, text=text)
     label.pack(side=tk.LEFT)
 
     for j in range(11):

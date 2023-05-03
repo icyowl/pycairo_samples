@@ -2,7 +2,7 @@ import colorsys
 import colour
 import numpy as np
 
-def rgb_to_hsl(R:int, G:int, B:int) -> tuple:
+def _rgb_to_hsl(R:int, G:int, B:int) -> tuple:
     rgb = (R, G, B)
     h, l, _ = colorsys.rgb_to_hls(*rgb)
 
@@ -13,7 +13,7 @@ def rgb_to_hsl(R:int, G:int, B:int) -> tuple:
 
     return H, S, L
 
-def hsl_to_rgb(H:float, S:float, L:float) -> tuple:
+def _hsl_to_rgb(H:float, S:float, L:float) -> tuple:
     h = H / 360
     maxc = 2.55 * (L + L * (S/100)) if L < 50 else 2.55 * (L + (100-L) * (S/100))
     minc = 2.55 * (L - L * (S/100)) if L < 50 else 2.55 * (L - (100-L) * (S/100))
@@ -23,6 +23,35 @@ def hsl_to_rgb(H:float, S:float, L:float) -> tuple:
     R, G, B = [int(x) for x in colorsys.hls_to_rgb(h, l, s)]
 
     return R, G, B
+
+def rgb_to_hsl(r, g, b):
+    r, g, b = [x/255. for x in (r, g, b)]
+    h, l, s = colorsys.rgb_to_hls(r, g, b)
+    h, s, l = h*360, s*100, l*100
+
+    return h, s, l
+
+def hsl_to_rgb(h, s, l):
+    h, l, s = h/360, l/100, s/100
+    r, g, b = colorsys.hls_to_rgb(h, l, s)
+    r, g, b = [int(round(x*255)) for x in (r, g, b)]
+
+    return r, g, b
+
+def rgb_to_hsv(r, g, b):
+    r, g, b = [x/255. for x in (r, g, b)]
+    h, s, v = colorsys.rgb_to_hsv(r, g, b)
+    h, s, v = h*360, s*100, v*100
+
+    return h, s, v
+
+def hsv_to_rgb(h, s, v):
+    h, s, v = h/360, s/100, v/100
+    r, g, b = colorsys.hsv_to_rgb(h, s, v)
+    r, g, b = [int(round(x*255)) for x in (r, g, b)]
+
+    return r, g, b
+
 
 def hex_to_rgb(code):
     c = code.strip("#")

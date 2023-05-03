@@ -8,6 +8,17 @@ from mycolorsys import hex_to_rgb, rgb_to_hex
 # cv2.imshow("image", img)
 # cv2.waitKey(0)
 
+def sRGB_to_lRGB(r, g, b):
+    # sRGBからガンマ補正を取り除き、linear-sRGBへ変換
+    GAMMA = 2.4
+    r, g, b = [x/255. for x in (r, g, b)]
+    r = r / 12.92 if r<=0.040450 else ((r + 0.055) / 1.055) ** GAMMA
+    g = g / 12.92 if g<=0.040450 else ((g + 0.055) / 1.055) ** GAMMA
+    b = b / 12.92 if b<=0.040450 else ((b + 0.055) / 1.055) ** GAMMA
+
+    return r, g, b
+
+
 def foo(color):
     GAMMA = 2.4
     # r, g, b = colors[key][1:3], colors[key][3:5], colors[key][5:]
