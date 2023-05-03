@@ -34,26 +34,31 @@ def rgb_to_hex(R, G, B):
 
 def hex_to_hsl(code):
     r, g, b = hex_to_rgb(code)
+    
     return rgb_to_hsl(r, g, b)
 
 def hsl_to_hex(H, S, L):
     rgb = hsl_to_rgb(H, S, L)
+
     return rgb_to_hex(*rgb)
 
-def hex_to_lch(code):
-    rgb = hex_to_rgb(code)
-    xyz = colour.sRGB_to_XYZ(np.array(rgb)/255.)
+def rbg_to_lch(R, G, B):
+    xyz = colour.sRGB_to_XYZ(np.array([R, G, B])/255.)
     lab = colour.XYZ_to_Lab(xyz)
     lch = colour.Lab_to_LCHab(lab)
 
-    return lch
+    return tuple(lch.tolist())
 
-def lch_to_hex(lch):
-    lab = colour.LCHab_to_Lab(lch)
+def lch_to_rgb(L, C, H):
+    lab = colour.LCHab_to_Lab(np.array([L, C, H]))
     xyz = colour.Lab_to_XYZ(lab)
     srgb = colour.XYZ_to_sRGB(xyz)
-    r, g, b = np.around(srgb*255).astype(int)
-    code = rgb_to_hex(r, g, b)
+    
+    return np.around(srgb*255).astype(int)
 
-    return code
+def lch_to_hex(L, C, H):
+    R, G, B = lch_to_rgb(L, C, H)
+
+    return rgb_to_hex(R, G, B)
+
 
