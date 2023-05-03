@@ -71,7 +71,7 @@ def hsl_to_hex(H, S, L):
 
     return rgb_to_hex(*rgb)
 
-def rbg_to_lch(R, G, B):
+def rgb_to_lch(R, G, B):
     xyz = colour.sRGB_to_XYZ(np.array([R, G, B])/255.)
     lab = colour.XYZ_to_Lab(xyz)
     lch = colour.Lab_to_LCHab(lab)
