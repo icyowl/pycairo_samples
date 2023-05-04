@@ -4,7 +4,9 @@ from mycolorsys import *
 root = tk.Tk()
 
 hc = "#ADC3FF"
+hc = "#AF0000"
 r, g, b = hex_to_rgb(hc)
+print(r, g, b)
 l, c, h = rgb_to_lch(r, g, b)
 
 hue = h
@@ -19,17 +21,21 @@ for i in range(11):
 
 frame.pack()
 
-for i in range(1):
-    val = c
+for i in range(5, 15):
+    val = i*10
     frame = tk.Frame(root)
-    text = "c*=" + str(round(val)).rjust(3, " ") 
+    text = "c* =" + str(round(val)).rjust(3, " ") 
     label = tk.Label(frame, text=text)
     label.pack(side=tk.LEFT)
 
     for j in range(11):
         L = j*10
         r, g, b = lch_to_rgb(L, c, h)
-        color = rgb_to_hex(r, g, b) if 0<=r<=255 and 0<=g<=255 and 0<=b<=255 else "#ffffff"
+        if 0<=r<=255 and 0<=g<=255 and 0<=b<=255:
+            color = rgb_to_hex(r, g, b)
+        else:
+            color = "#ffffff"
+            print(r, g, b)
         canvas = tk.Canvas(frame, width=50, height=50, bg=color)
         canvas.pack(padx=3, pady=3, side=tk.LEFT)
     
