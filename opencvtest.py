@@ -16,9 +16,9 @@ def sRGB_to_XYZ(rgb: ArrayLike) -> np.array:
     gcf = np.vectorize(lambda x: x / 12.92 if x<=0.040450 else ((x+0.055)/1.055) ** GAMMA, otypes=[float])
     linear_rgb = gcf(rgb)
     xyz_matrix = np.array([
-        [0.4124, 0.2126, 0.0193],
-        [0.3576, 0.7152, 0.1192],
-        [0.1805, 0.0722, 0.9505]
+            [0.4124, 0.2126, 0.0193],
+            [0.3576, 0.7152, 0.1192],
+            [0.1805, 0.0722, 0.9505]
         ])
 
     return np.dot(linear_rgb, xyz_matrix)
@@ -26,19 +26,18 @@ def sRGB_to_XYZ(rgb: ArrayLike) -> np.array:
 def XYZ_to_LAB(xyz: ArrayLike) -> np.array:
     x, y, z = xyz
     xn, yn, zn = 0.9505, 1.0, 1.089
-    f = lambda x: x**(1/3) if x>0.008856 else (841/108)*x+(16/116)
-    l = 116 * f(y/yn) - 16
-    a = 500 * (f(x/xn) - f(y/yn))
-    b = 200 * (f(y/yn) - f(z/zn))
+    func = lambda x: x**(1/3) if x>0.008856 else (841/108)*x+(16/116)
+    l = 116 * func(y/yn) - 16
+    a = 500 * (func(x/xn) - func(y/yn))
+    b = 200 * (func(y/yn) - func(z/zn))
 
     return np.array([l, a, b])
 
 def LAB_to_LCH(lab: ArrayLike) -> np.array:
     l, a, b = lab
-    norm = lambda x, y: np.sqrt(x**2 + y**2)
-    f = lambda rad: rad * 180 / np.pi
-    c = norm(a, b)
-    h = f(np.arctan2(b, a))
+    c = np.sqrt(a**2, b**2)
+    func = lambda rad: rad * 180 / np.pi
+    h = func(np.arctan2(b, a))
 
     return np.array([l, c, h])
 
@@ -62,9 +61,9 @@ def LAB_to_XYZ(lab: ArrayLike):
 
 def XYZ_to_sRGB(xyz: ArrayLike):
     rgb_matrix = np.array([
-        [3.2406, -0.9689, 0.0557],
-        [-1.5372, 1.8758, -0.2040],
-        [-0.4986, 0.0415, 1.0570]
+            [3.2406, -0.9689, 0.0557],
+            [-1.5372, 1.8758, -0.2040],
+            [-0.4986, 0.0415, 1.0570]
         ])
     linear_rgb = np.dot(xyz, rgb_matrix)
 

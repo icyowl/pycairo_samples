@@ -1,6 +1,7 @@
 import colorsys
 import colour
 import numpy as np
+from numpy.typing import ArrayLike
 
 def _rgb_to_hsl(R:int, G:int, B:int) -> tuple:
     rgb = (R, G, B)
@@ -24,12 +25,12 @@ def _hsl_to_rgb(H:float, S:float, L:float) -> tuple:
 
     return R, G, B
 
-def rgb_to_hsl(r, g, b):
-    r, g, b = [x/255. for x in (r, g, b)]
+def rgb_to_hsl(rgb: ArrayLike):
+    r, g, b = [x/255. for x in rgb]
     h, l, s = colorsys.rgb_to_hls(r, g, b)
     h, s, l = h*360, s*100, l*100
 
-    return h, s, l
+    return np.array([h, s, l])
 
 def hsl_to_rgb(h, s, l):
     h, l, s = h/360, l/100, s/100
@@ -71,15 +72,18 @@ def hsl_to_hex(H, S, L):
 
     return rgb_to_hex(*rgb)
 
-def rgb_to_lch(R, G, B):
-    xyz = colour.sRGB_to_XYZ(np.array([R, G, B])/255.)
+def rgb_to_lch(rgb):
+    rgb = [x/255. for x in rgb]
+    xyz = colour.sRGB_to_XYZ(rgb)
     lab = colour.XYZ_to_Lab(xyz)
     lch = colour.Lab_to_LCHab(lab)
 
-    return tuple(lch.tolist())
+    l, c, h = [round(x, 3) for x in lch.tolist()]
 
-def lch_to_rgb(L, C, H):
-    lab = colour.LCHab_to_Lab(np.array([L, C, H]))
+    return l, c, h
+
+def lch_to_rgb(lch):
+    lab = colour.LCHab_to_Lab(lch)
     xyz = colour.Lab_to_XYZ(lab)
     srgb = colour.XYZ_to_sRGB(xyz)
     

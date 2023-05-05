@@ -7,7 +7,7 @@ hc = "#ADC3FF"
 hc = "#AF0000"
 r, g, b = hex_to_rgb(hc)
 print(r, g, b)
-l, c, h = rgb_to_lch(r, g, b)
+l, c, h = rgb_to_lch((r, g, b))
 
 hue = h
 root.title(f"Lch Table hue={round(hue, 1)}")
@@ -21,16 +21,17 @@ for i in range(11):
 
 frame.pack()
 
-for i in range(5, 15):
+for i in range(11):
     val = i*10
     frame = tk.Frame(root)
     text = "c* =" + str(round(val)).rjust(3, " ") 
     label = tk.Label(frame, text=text)
     label.pack(side=tk.LEFT)
 
-    for j in range(11):
-        L = j*10
-        r, g, b = lch_to_rgb(L, c, h)
+    n = 1
+    for j in range(11*n):
+        L = j*(10/n)
+        r, g, b = lch_to_rgb((L, c, h))
         if 0<=r<=255 and 0<=g<=255 and 0<=b<=255:
             color = rgb_to_hex(r, g, b)
         else:
