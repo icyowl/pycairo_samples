@@ -34,19 +34,25 @@ if __name__ == "__main__":
     p = "lch_df.pkl"
     with open(p, "rb") as f: df = pickle.load(f)
 
-    idx = (59. < df["L*"]) & (df["L*"] < 60.) & (59. < df["c*"]) & (df["c*"] < 60.)
+    idx = (77. < df["L*"]) & (df["L*"] < 83.) & (34. < df["c*"]) & (df["c*"] < 38.)
     _df = df[idx]
     print(len(_df))
 
+    f = np.vectorize(lambda x: 0. <= x <= 1.)
     n = len(_df)
     colors = []
+    prev_hue = None
     for i, (idx, row) in enumerate(_df.iterrows()):
-        if not i%int(n/360):
+        if not prev_hue == int(row["hue"]):
             rgb = lch_to_rgb(row.values)
+            rgb = np.round(rgb, 3)
+            if f(rgb).sum() != 3:
+                print(rgb)
             colors.append(rgb)
+            prev_hue = int(row["hue"])
+            # print(prev_hue)
 
     print(len(colors))
-
 
     fig, ax = plt.subplots(figsize=(4,4))
 
@@ -56,13 +62,12 @@ if __name__ == "__main__":
     ax.axis("off")
 
     for i, (r, g, b) in enumerate(colors):
-        if i < 390:
-            w = patches.Wedge((0,0), 
-                            0.9, 
-                            width=0.3,
-                            theta1=i, 
-                            theta2=i+1, 
-                            color=(r, g, b))
-            ax.add_patch(w)
+        w = patches.Wedge((0,0), 
+                        0.9, 
+                        width=0.3,
+                        theta1=i, 
+                        theta2=i+1, 
+                        color=(r, g, b))
+        ax.add_patch(w)
     
     plt.show()
