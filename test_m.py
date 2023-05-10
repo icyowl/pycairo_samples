@@ -39,20 +39,31 @@ if __name__ == "__main__":
     print(len(_df))
 
     f = np.vectorize(lambda x: 0. <= x <= 1.)
-    n = len(_df)
     colors = []
-    prev_hue = None
-    for i, (idx, row) in enumerate(_df.iterrows()):
-        if not prev_hue == int(row["hue"]):
-            rgb = lch_to_rgb(row.values)
-            rgb = np.round(rgb, 3)
-            if f(rgb).sum() != 3:
-                print(rgb)
-            colors.append(rgb)
-            prev_hue = int(row["hue"])
-            # print(prev_hue)
+    # prev_hue = None
+    # for i, (idx, row) in enumerate(_df.iterrows()):
+    #     if not prev_hue == int(row["hue"]):
+    #         rgb = lch_to_rgb(row.values)
+    #         rgb = np.round(rgb, 3)
+    #         if f(rgb).sum() != 3:
+    #             print(rgb)
+    #         colors.append(rgb)
+    #         prev_hue = int(row["hue"])
+    #         # print(prev_hue)
+
+    # print(len(colors))
+
+    for i in range(360):
+        lch = [80.0, 30.0, i+0.0]
+        rgb = lch_to_rgb(lch)
+        rgb = np.round(rgb, 2)
+        colors.append(rgb)
+        # if f(rgb).sum() != 3:
+        #     colors += rgb.tolist()
+        
 
     print(len(colors))
+    # if len(colors): print(max(colors), min(colors))
 
     fig, ax = plt.subplots(figsize=(4,4))
 

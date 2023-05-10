@@ -38,11 +38,11 @@ def make_lchs():
 
 if __name__ == "__main__":
     
-    make_lchs()
+    # make_lchs()
 
-    # p = "arr_half_lchs.pkl"
-    # with open(p, "rb") as f:
-    #     arr = pickle.load(f)
+    p = "lch_df.pkl"
+    with open(p, "rb") as f:
+        df = pickle.load(f)
 
     # L = arr[:, 0]
     # chroma = arr[:, 1]
@@ -51,6 +51,9 @@ if __name__ == "__main__":
     # print(max(L), min(L))
     # print(max(chroma), min(chroma))
     # print(max(hue), min(hue))
+
+    plt.plot(df["hue"], df["c*"])
+    plt.show()
 
     # h = np.unique(hue)
     # idx, = np.where((29.9999 < h) & (h < 30.0001))
@@ -79,32 +82,3 @@ if __name__ == "__main__":
 # with open('lch_list.pkl', 'wb') as f:
 #     pickle.dump(hlc_list, f)
 
-import pickle 
-import numpy as np
-import matplotlib.pyplot as plt
-
-p = "lchs.pkl"
-with open(p, "rb") as f:
-    lch = pickle.load(f)
-
-arr = np.array(lch)
-# L = arr[:, 0]
-# chroma = arr[:, 1]
-# hue = arr[:, 2]
-
-# plt.plot(hue, L)
-# plt.show()
-
-hlc_list = []
-for i in range(360):
-    # if i: break
-    h = i + 0.0
-    idx, = np.where(arr[:,2] == h)
-    l = [arr[i][0] for i in idx]
-    c = [arr[i][1] for i in idx]
-    val = h, (min(l), max(l)), (min(c), max(c))
-    print(val)
-    hlc_list.append(val)
-
-with open('lch_list.pkl', 'wb') as f:
-    pickle.dump(hlc_list, f)
