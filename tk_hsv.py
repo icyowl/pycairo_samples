@@ -1,7 +1,18 @@
 import colorsys
 import tkinter as tk
-from mycolorsys import hsv_to_rgb
 
+def hsv2rgb(hsv: tuple) -> tuple:
+    h, s, v = hsv
+    rgb = colorsys.hsv_to_rgb(h/360., s/100., v/100.)
+    return tuple(round(x*255.) for x in rgb)
+
+def hsl2rgb(hsl: tuple) -> tuple:
+    h, s, l = hsl 
+    rgb = colorsys.hsv_to_rgb(h/360., s/100., l/100.)
+    return tuple(round(x*255.) for x in rgb)
+
+def rgb2hex(rgb: tuple) -> str:
+    return "#%02x%02x%02x" % tuple(rgb)
 
 class Application(tk.Frame):
     def __init__(self, master = None):
@@ -27,12 +38,10 @@ class Application(tk.Frame):
         canvas.pack()
         x = 0
         for i in range(360):
-            rgb = colorsys.hsv_to_rgb(i/360, 1.0, 0.5)
-            rgb = tuple(int(x*255) for x in rgb)
-            hrgb = "#%02x%02x%02x" % rgb
-            canvas.create_line(x, 0, x, 64, width=1.5, fill=hrgb)
+            hsv = i, 100., 50.
+            rgb = hsv2rgb(hsv)
+            canvas.create_line(x, 0, x, 64, width=1.5, fill=rgb2hex(rgb))
             x += 1.5
-
 
     def canvas_draw(self, frame, hue):
         frm = tk.Frame(frame)
@@ -53,8 +62,9 @@ class Application(tk.Frame):
             label.pack(side=tk.LEFT)
             for j in range(11):
                 sat = j*10
-                r, g, b = hsv_to_rgb(hue, sat, val)
-                canvas = tk.Canvas(frm, width=50, height=50, bg=self.rgb2hex((r, g, b)))
+                hsv = hue, sat, val
+                rgb = hsv2rgb(hsv)
+                canvas = tk.Canvas(frm, width=50, height=50, bg=rgb2hex(rgb))
                 canvas.pack(padx=3, pady=3, side=tk.LEFT)
                 self.color_matrix[i].append(canvas)
 
@@ -73,18 +83,13 @@ class Application(tk.Frame):
                     )
         scale.pack()
     
-    @staticmethod
-    def rgb2hex(rgb):
-        """translates an rgb tuple of int to a tkinter friendly color code
-        """
-        return "#%02x%02x%02x" % rgb   
-
     def callback(self, event=None):
         hue = self.var.get()
         for i in range(11):
             for j in range(11):
-                r, g, b = hsv_to_rgb(hue, j*10, i*10)
-                self.color_matrix[i][j].config(bg=self.rgb2hex((r, g, b)))
+                hsv = hue, j*10, i*10
+                rgb = hsv2rgb(hsv)
+                self.color_matrix[i][j].config(bg=rgb2hex(rgb))
 
 
 if __name__ == "__main__":
