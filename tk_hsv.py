@@ -18,14 +18,14 @@ class Application(tk.Frame):
     def __init__(self, master = None):
         super().__init__(master)
 
-        self.master.title("HSV Demo")
+        self.master.title("HSV Model")
 
         frame_c = tk.Frame(self.master)
-        frame_c.pack(pady=10)
+        frame_c.pack()
         self.hue_canvas(frame_c)
 
         frame_u = tk.Frame(self.master)
-        frame_u.pack(pady=5)
+        frame_u.pack()
         self.var = tk.IntVar(value=0)
         self.scale_widget(frame_u)
 
@@ -34,23 +34,27 @@ class Application(tk.Frame):
         self.canvas_draw(self.frame_d, 0)
 
     def hue_canvas(self, frame):
-        canvas = tk.Canvas(frame, width=540, height=64)
+        canvas = tk.Canvas(frame, width=360, height=47)
         canvas.pack()
         x = 0
         for i in range(360):
             hsv = i, 100., 50.
             rgb = hsv2rgb(hsv)
-            canvas.create_line(x, 0, x, 64, width=1.5, fill=rgb2hex(rgb))
-            x += 1.5
+            canvas.create_line(x, 0, x, 64, width=1, fill=rgb2hex(rgb))
+            x += 1
 
     def canvas_draw(self, frame, hue):
         frm = tk.Frame(frame)
         frm.pack()
-        tk.Label(frm, text="Sat =", width=5).pack(side=tk.LEFT)
+        lbl = tk.Label(frm, text="Saturation")
+        lbl.pack()
+        c = tk.Canvas(frm, width=37, height=20)
+        c.create_text(20, 14, text="Value")
+        c.pack(padx=3, side=tk.LEFT)
         for i in range(11):
-            canvas = tk.Canvas(frm, width=50, height=20)
-            canvas.create_text(28, 14, text=f"{i*10}%")
-            canvas.pack(padx=3, pady=3, side=tk.LEFT)
+            canvas = tk.Canvas(frm, width=37, height=20)
+            canvas.create_text(20, 12, text=f"{i*10}%")
+            canvas.pack(padx=3, side=tk.LEFT)
 
         self.color_matrix = [[] for _ in range(11)]
         for i in range(11):
@@ -58,13 +62,14 @@ class Application(tk.Frame):
             text = "V=" + str(val).rjust(3, " ") + "%"
             frm = tk.Frame(frame)
             frm.pack()
-            label = tk.Label(frm, text=text)
-            label.pack(side=tk.LEFT)
+            cc = tk.Canvas(frm, width=37, height=37)
+            cc.create_text(20, 20, text=f"{i*10}%")
+            cc.pack(padx=3, pady=3, side=tk.LEFT)
             for j in range(11):
                 sat = j*10
                 hsv = hue, sat, val
                 rgb = hsv2rgb(hsv)
-                canvas = tk.Canvas(frm, width=50, height=50, bg=rgb2hex(rgb))
+                canvas = tk.Canvas(frm, width=37, height=37, bg=rgb2hex(rgb))
                 canvas.pack(padx=3, pady=3, side=tk.LEFT)
                 self.color_matrix[i].append(canvas)
 
@@ -73,8 +78,8 @@ class Application(tk.Frame):
                     variable = self.var, 
                     command = self.callback,
                     orient=tk.HORIZONTAL, 
-                    length = 540,
-                    width = 20,
+                    length = 360,
+                    width = 12,
                     sliderlength = 10,    # スライダー（つまみ）の幅
                     from_ = 0,
                     to = 360,

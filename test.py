@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import colour
 import time
+import tkinter as tk
 
 def lch_to_rgb(lch):
     lab = colour.LCHab_to_Lab(lch)
@@ -38,11 +39,12 @@ def make_lchs():
 
 if __name__ == "__main__":
     
+    ...
     # make_lchs()
 
-    p = "lch_df.pkl"
-    with open(p, "rb") as f:
-        df = pickle.load(f)
+    # p = "lch_df.pkl"
+    # with open(p, "rb") as f:
+    #     df = pickle.load(f)
 
     # L = arr[:, 0]
     # chroma = arr[:, 1]
@@ -52,8 +54,8 @@ if __name__ == "__main__":
     # print(max(chroma), min(chroma))
     # print(max(hue), min(hue))
 
-    plt.plot(df["hue"], df["c*"])
-    plt.show()
+    # plt.plot(df["hue"], df["c*"])
+    # plt.show()
 
     # h = np.unique(hue)
     # idx, = np.where((29.9999 < h) & (h < 30.0001))
