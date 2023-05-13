@@ -14,24 +14,54 @@ def hsl2rgb(hsl: tuple) -> tuple:
 def rgb2hex(rgb: tuple) -> str:
     return "#%02x%02x%02x" % tuple(rgb)
 
+def hex2hsv(hex: str) -> tuple:
+    hx = hex.strip("#")
+    rgb = [int(x, 16) for x in (hx[:2], hx[2:4], hx[4:])]
+    rgb = [x/255. for x in rgb]
+    h, s, v = colorsys.rgb_to_hsv(*rgb)
+
+    return h*360., s*100., v*100.
+
 class Application(tk.Frame):
     def __init__(self, master = None):
         super().__init__(master)
 
         self.master.title("HSV Model")
 
-        frame_c = tk.Frame(self.master)
-        frame_c.pack()
-        self.hue_canvas(frame_c)
+        frame_upper = tk.Frame(self.master)
+        frame_upper.pack()
+        frame_bottom = tk.Frame(self.master)
+        frame_bottom.pack()
+        frame_upper_west = tk.Frame(frame_upper)
+        frame_upper_west.pack(side=tk.LEFT)
+        frame_upper_east = tk.Frame(frame_upper)
+        frame_upper_east.pack()
 
-        frame_u = tk.Frame(self.master)
-        frame_u.pack()
+        self.hue_canvas(frame_upper_west)
         self.var = tk.IntVar(value=0)
-        self.scale_widget(frame_u)
+        self.scale_widget(frame_upper_west)
 
-        self.frame_d = tk.Frame(self.master)
-        self.frame_d.pack(padx=10, pady=10)
-        self.canvas_draw(self.frame_d, 0)
+        frame_entry = tk.Frame(frame_upper_east)
+        frame_entry.pack()
+        self.entry = tk.Entry(frame_entry)
+        self.entry.pack(side=tk.LEFT)
+        button = tk.Button(frame_entry, text="submit", command=self.spam)
+        button.pack()
+        frame_cvs = tk.Frame(frame_upper_east)
+        frame_cvs.pack()
+        self.cvs = tk.Canvas(frame_cvs, width=180, height=50, bg="gray")
+        self.cvs.pack()
+
+
+        self.canvas_draw(frame_bottom, 0)
+
+    def spam(self):
+        self.cvs.delete("message")
+        hc = self.entry.get()
+        h, s, v = hex2hsv(hc)
+        self.cvs.create_text(100, 20, text=f"{round(h)},{round(s)}", tag="message")
+
+
 
     def hue_canvas(self, frame):
         canvas = tk.Canvas(frame, width=360, height=47)
