@@ -45,7 +45,7 @@ class Application(tk.Frame):
         frame_entry.pack()
         self.entry = tk.Entry(frame_entry)
         self.entry.pack(side=tk.LEFT)
-        button = tk.Button(frame_entry, text="submit", command=self.spam)
+        button = tk.Button(frame_entry, text="submit", command=self.check_color)
         button.pack()
         frame_cvs = tk.Frame(frame_upper_east)
         frame_cvs.pack()
@@ -55,12 +55,20 @@ class Application(tk.Frame):
 
         self.canvas_draw(frame_bottom, 0)
 
-    def spam(self):
+    def check_color(self):
         self.cvs.delete("message")
         hc = self.entry.get()
         h, s, v = hex2hsv(hc)
-        self.cvs.create_text(100, 20, text=f"{round(h)},{round(s)}", tag="message")
-
+        hue_int = round(h)
+        self.cvs.create_text(
+            100, 
+            20, 
+            text=f"{round(h,2)},{round(s,2)}, {round(v,2)}", 
+            tag="message"
+            )
+        self.scale.config(variable=tk.IntVar(value=hue_int))
+        self.change_matrix(hue_int)
+        self.mark_matrix(int(v/10), int(s/10))
 
 
     def hue_canvas(self, frame):
@@ -104,7 +112,7 @@ class Application(tk.Frame):
                 self.color_matrix[i].append(canvas)
 
     def scale_widget(self, flame):
-        scale = tk.Scale(flame, 
+        self.scale = tk.Scale(flame, 
                     variable = self.var, 
                     command = self.callback,
                     orient=tk.HORIZONTAL, 
@@ -116,19 +124,30 @@ class Application(tk.Frame):
                     resolution=1,         # 変化の分解能(初期値:1)
                     tickinterval=100      # 目盛りの分解能(初期値0で表示なし)
                     )
-        scale.pack()
+        self.scale.pack()
     
     def callback(self, event=None):
+        self.scale.config(variable=self.var)
         hue = self.var.get()
         for i in range(11):
             for j in range(11):
                 hsv = hue, j*10, i*10
                 rgb = hsv2rgb(hsv)
+                self.color_matrix[i][j].delete("mark")
                 self.color_matrix[i][j].config(bg=rgb2hex(rgb))
-        res = self.color_matrix[3][3].cget("bg")
-        self.color_matrix[3][3].config(bg="black")
-        self.color_matrix[3][3].create_rectangle(4, 4, 36, 36, fill=res, outline="white")
         
+    def change_matrix(self, hue):
+        for i in range(11):
+            for j in range(11):
+                hsv = hue, j*10, i*10
+                rgb = hsv2rgb(hsv)
+                self.color_matrix[i][j].delete("mark")
+                self.color_matrix[i][j].config(bg=rgb2hex(rgb))
+
+    def mark_matrix(self, i, j):
+        this_color = self.color_matrix[i][j].cget("bg")
+        self.color_matrix[i][j].config(bg="black")
+        self.color_matrix[i][j].create_rectangle(4, 4, 36, 36, fill=this_color, outline="white", tag="mark")
 
 
 if __name__ == "__main__":
