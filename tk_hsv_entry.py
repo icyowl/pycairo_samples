@@ -8,7 +8,7 @@ def hsv2rgb(hsv: tuple) -> tuple:
 
 def hsl2rgb(hsl: tuple) -> tuple:
     h, s, l = hsl 
-    rgb = colorsys.hsv_to_rgb(h/360., s/100., l/100.)
+    rgb = colorsys.hls_to_rgb(h/360., l/100., s/100.)
     return tuple(round(x*255.) for x in rgb)
 
 def rgb2hex(rgb: tuple) -> str:
@@ -41,6 +41,16 @@ class Application(tk.Frame):
         self.var = tk.IntVar(value=0)
         self.scale_widget(frame_upper_west)
 
+        frame_rb = tk.Frame(frame_upper_east)
+        frame_rb.pack()
+        self.var1 = tk.IntVar()
+        self.var1.set(0)
+        rb1 = tk.Radiobutton(frame_rb, value=0, variable=self.var1, text="HSV", command=self.ham)
+        rb1.pack(side=tk.LEFT, padx=5)
+        rb2 = tk.Radiobutton(frame_rb, value=1, variable=self.var1, text="HSL", command=self.eggs)
+        rb2.pack(padx=5)
+
+
         frame_entry = tk.Frame(frame_upper_east)
         frame_entry.pack()
         self.entry = tk.Entry(frame_entry)
@@ -54,6 +64,14 @@ class Application(tk.Frame):
 
 
         self.canvas_draw(frame_bottom, 0)
+
+    def ham(self):
+        self.c.delete("vorl")
+        self.c.create_text(20, 14, text="Value", tag="vorl")
+
+    def eggs(self):
+        self.c.delete("vorl")
+        self.c.create_text(20, 14, text="Lightness", tag="vorl")
 
     def check_color(self):
         self.cvs.delete("message")
@@ -86,9 +104,9 @@ class Application(tk.Frame):
         frm.pack()
         lbl = tk.Label(frm, text="Saturation")
         lbl.pack()
-        c = tk.Canvas(frm, width=37, height=20)
-        c.create_text(20, 14, text="Value")
-        c.pack(padx=3, side=tk.LEFT)
+        self.c = tk.Canvas(frm, width=37, height=20)
+        self.c.create_text(20, 14, text="Value", tag="vorl")
+        self.c.pack(padx=3, side=tk.LEFT)
         for i in range(11):
             canvas = tk.Canvas(frm, width=37, height=20)
             canvas.create_text(20, 12, text=f"{i*10}%")
@@ -127,12 +145,16 @@ class Application(tk.Frame):
         self.scale.pack()
     
     def callback(self, event=None):
+        if self.var1.get():
+            f = lambda x: hsl2rgb(x)
+        else:
+            f = lambda x: hsv2rgb(x)
         self.scale.config(variable=self.var)
         hue = self.var.get()
         for i in range(11):
             for j in range(11):
                 hsv = hue, j*10, i*10
-                rgb = hsv2rgb(hsv)
+                rgb = f(hsv)
                 self.color_matrix[i][j].delete("mark")
                 self.color_matrix[i][j].config(bg=rgb2hex(rgb))
         
