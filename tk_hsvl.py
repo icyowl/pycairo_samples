@@ -4,15 +4,16 @@ import tkinter as tk
 def hsv2rgb(hsv: tuple) -> tuple:
     h, s, v = hsv
     rgb = colorsys.hsv_to_rgb(h/360., s/100., v/100.)
-    return tuple(round(x*255.) for x in rgb)
+    return rgb
 
 def hsl2rgb(hsl: tuple) -> tuple:
     h, s, l = hsl 
-    rgb = colorsys.hsv_to_rgb(h/360., s/100., l/100.)
-    return tuple(round(x*255.) for x in rgb)
+    rgb = colorsys.hls_to_rgb(h/360., l/100., s/100.)
+    return rgb
 
 def rgb2hex(rgb: tuple) -> str:
-    return "#%02x%02x%02x" % tuple(rgb)
+    rgb = tuple(round(x*255.) for x in rgb)
+    return "#%02x%02x%02x" % rgb
 
 def hex2hsv(hex: str) -> tuple:
     hx = hex.strip("#")
@@ -27,6 +28,7 @@ class Application(tk.Frame):
         super().__init__(master)
 
         self.master.title("HSV & HSL Model")
+        self.default_bg = self.master["background"]
 
         frame_north = tk.Frame(self.master)
         frame_south = tk.Frame(self.master)
@@ -38,24 +40,48 @@ class Application(tk.Frame):
         frame_north_west.pack(side=tk.LEFT)
         frame_north_east.pack()
 
+        frm_rb = tk.Frame(frame_north_west)
         frm_entry = tk.Frame(frame_north_west)
         frm_canvas = tk.Frame(frame_north_west)
-        frm_entry.pack()
-        frm_canvas.pack()
+        frm_rb.pack(anchor=tk.W)
+        frm_entry.pack(anchor=tk.W)
+        frm_canvas.pack(anchor=tk.W)
+
+        self.var_rb = tk.IntVar()
+        self.var_rb.set(0)
+        rb_hsv = tk.Radiobutton(frm_rb, value=0, variable=self.var_rb, text="HSV", command=self.select_hsv)
+        rb_hsv.pack(side=tk.LEFT, padx=2)
+        rb_hsl = tk.Radiobutton(frm_rb, value=1, variable=self.var_rb, text="HSL", command=self.select_hsl)
+        rb_hsl.pack(padx=4)
+
         lbl = tk.Label(frm_entry, text="Hex")
-        lbl.pack(side=tk.LEFT)
-        self.entry = tk.Entry(frm_entry, width=8)
-        self.entry.pack(side=tk.LEFT)
-        btn = tk.Button(frm_entry, text="submit", width=4, command=self.check_color)
-        btn.pack()
-        self.cvs = tk.Canvas(frm_canvas, width=180, height=50, bg="gray")
+        lbl.pack(side=tk.LEFT, padx=2, pady=4)
+        self.entry = tk.Entry(frm_entry, width=10)
+        self.entry.pack(side=tk.LEFT, padx=2)
+        btn = tk.Button(frm_entry, text="submit", width=6, command=self.check_color)
+        btn.pack(padx=2)
+        self.cvs = tk.Canvas(frm_canvas, width=180, height=50)
         self.cvs.pack()
 
-        self.hue_canvas(frame_north_east)
-        self.var = tk.IntVar(value=0)
+        self.draw_hue(frame_north_east)
+
+        self.var_hue = tk.IntVar(value=0)
         self.scale_widget(frame_north_east)
 
         self.canvas_draw(frame_south, 0)
+        tk.Frame(frame_south, height=8).pack() # 下の余白
+
+    def select_hsv(self):
+        self.lightness.delete("all")
+        self.lightness.create_text(25, 15, text="Value")
+        self.scale.config(variable=tk.IntVar(value=0))
+        self.change_matrix(hue=0)
+
+    def select_hsl(self):
+        self.lightness.delete("all")
+        self.lightness.create_text(30, 15, text="Lightness")
+        self.scale.config(variable=tk.IntVar(value=0))
+        self.change_matrix(hue=0)
 
     def check_color(self):
         self.cvs.delete("message")
@@ -73,38 +99,37 @@ class Application(tk.Frame):
         self.mark_matrix(int(v/10), int(s/10))
 
 
-    def hue_canvas(self, frame):
-        canvas = tk.Canvas(frame, width=360, height=47)
-        canvas.pack()
-        x = 0
+    def draw_hue(self, frame):
+        tk.Label(frame, text="hue").pack()
+        hue_canvas = tk.Canvas(frame, width=360, height=47)
+        hue_canvas.pack(padx=4)
         for i in range(360):
-            hsv = i, 100., 50.
+            hsv = i, 100., 100.
             rgb = hsv2rgb(hsv)
-            canvas.create_line(x, 0, x, 64, width=1, fill=rgb2hex(rgb))
-            x += 1
+            hue_canvas.create_line(i, 0, i, 47, width=1, fill=rgb2hex(rgb))
 
     def canvas_draw(self, frame, hue):
         frm = tk.Frame(frame)
-        frm.pack()
+        frm.pack(padx=4)
         lbl = tk.Label(frm, text="Saturation")
         lbl.pack()
-        c = tk.Canvas(frm, width=37, height=20)
-        c.create_text(20, 14, text="Value")
-        c.pack(padx=3, side=tk.LEFT)
+        self.lightness = tk.Canvas(frm, width=60, height=20)
+        self.lightness.create_text(25, 15, text="Value")
+        self.lightness.pack(padx=3, side=tk.LEFT)
+
         for i in range(11):
-            canvas = tk.Canvas(frm, width=37, height=20)
-            canvas.create_text(20, 12, text=f"{i*10}%")
-            canvas.pack(padx=3, side=tk.LEFT)
+            xlim = tk.Canvas(frm, width=37, height=20)
+            xlim.create_text(13, 11, text=f"{i*10}%")
+            xlim.pack(padx=3, side=tk.LEFT)
 
         self.color_matrix = [[] for _ in range(11)]
         for i in range(11):
             val = i*10
-            text = "V=" + str(val).rjust(3, " ") + "%"
             frm = tk.Frame(frame)
             frm.pack()
-            cc = tk.Canvas(frm, width=37, height=37)
-            cc.create_text(20, 20, text=f"{i*10}%")
-            cc.pack(padx=3, pady=3, side=tk.LEFT)
+            ylim = tk.Canvas(frm, width=37, height=37)
+            ylim.create_text(20, 20, text=f"{i*10}%")
+            ylim.pack(padx=3, pady=3, side=tk.LEFT)
             for j in range(11):
                 sat = j*10
                 hsv = hue, sat, val
@@ -115,7 +140,7 @@ class Application(tk.Frame):
 
     def scale_widget(self, flame):
         self.scale = tk.Scale(flame, 
-                    variable = self.var, 
+                    variable = self.var_hue, 
                     command = self.callback,
                     orient=tk.HORIZONTAL, 
                     length = 360,
@@ -129,20 +154,30 @@ class Application(tk.Frame):
         self.scale.pack()
     
     def callback(self, event=None):
-        self.scale.config(variable=self.var)
-        hue = self.var.get()
+        is_hsl = self.var_rb.get()
+        if is_hsl:
+            func = lambda x: hsl2rgb(x)
+        else:
+            func = lambda x: hsv2rgb(x)
+        self.scale.config(variable=self.var_hue)
+        hue = self.var_hue.get()
         for i in range(11):
             for j in range(11):
                 hsv = hue, j*10, i*10
-                rgb = hsv2rgb(hsv)
+                rgb = func(hsv)
                 self.color_matrix[i][j].delete("mark")
                 self.color_matrix[i][j].config(bg=rgb2hex(rgb))
         
     def change_matrix(self, hue):
+        is_hsl = self.var_rb.get()
+        if is_hsl:
+            func = lambda x: hsl2rgb(x)
+        else:
+            func = lambda x: hsv2rgb(x)
         for i in range(11):
             for j in range(11):
                 hsv = hue, j*10, i*10
-                rgb = hsv2rgb(hsv)
+                rgb = func(hsv)
                 self.color_matrix[i][j].delete("mark")
                 self.color_matrix[i][j].config(bg=rgb2hex(rgb))
 

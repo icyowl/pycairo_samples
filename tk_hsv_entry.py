@@ -4,15 +4,16 @@ import tkinter as tk
 def hsv2rgb(hsv: tuple) -> tuple:
     h, s, v = hsv
     rgb = colorsys.hsv_to_rgb(h/360., s/100., v/100.)
-    return tuple(round(x*255.) for x in rgb)
+    return rgb
 
 def hsl2rgb(hsl: tuple) -> tuple:
     h, s, l = hsl 
     rgb = colorsys.hls_to_rgb(h/360., l/100., s/100.)
-    return tuple(round(x*255.) for x in rgb)
+    return rgb
 
 def rgb2hex(rgb: tuple) -> str:
-    return "#%02x%02x%02x" % tuple(rgb)
+    rgb = tuple(round(x*255.) for x in rgb)
+    return "#%02x%02x%02x" % rgb
 
 def hex2hsv(hex: str) -> tuple:
     hx = hex.strip("#")
