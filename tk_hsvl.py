@@ -1,4 +1,5 @@
 import colorsys
+import re
 import tkinter as tk
 
 def hsv2rgb(hsv: tuple) -> tuple:
@@ -27,7 +28,7 @@ class Application(tk.Frame):
     def __init__(self, master = None):
         super().__init__(master)
 
-        self.master.title("HSV & HSL Model")
+        self.master.title("HSV Model & HSL Model")
         self.default_bg = self.master["background"]
 
         frame_north = tk.Frame(self.master)
@@ -58,7 +59,7 @@ class Application(tk.Frame):
         lbl.pack(side=tk.LEFT, padx=2, pady=4)
         self.entry = tk.Entry(frm_entry, width=10)
         self.entry.pack(side=tk.LEFT, padx=2)
-        btn = tk.Button(frm_entry, text="submit", width=6, command=self.check_color)
+        btn = tk.Button(frm_entry, text="submit", command=self.check_color)
         btn.pack(padx=2)
         self.cvs = tk.Canvas(frm_canvas, width=180, height=50)
         self.cvs.pack()
@@ -85,18 +86,26 @@ class Application(tk.Frame):
 
     def check_color(self):
         self.cvs.delete("message")
-        hc = self.entry.get()
-        h, s, v = hex2hsv(hc)
-        hue_int = round(h)
-        self.cvs.create_text(
-            100, 
-            20, 
-            text=f"{round(h,2)},{round(s,2)}, {round(v,2)}", 
-            tag="message"
+        hexcode = self.entry.get()
+        if re.fullmatch(r"[0-9|a-f]{6}", hexcode[1:]) and hexcode.startswith("#"):
+            h, s, v = hex2hsv(hexcode)
+            hue_int = round(h)
+            self.cvs.create_text(
+                100, 
+                20, 
+                text=f"{round(h,2)},{round(s,2)}, {round(v,2)}", 
+                tag="message"
+                )
+            self.scale.config(variable=tk.IntVar(value=hue_int))
+            self.change_matrix(hue_int)
+            self.mark_matrix(int(v/10), int(s/10))
+        else:
+            self.cvs.create_text(
+                100,
+                20,
+                text="foo!",
+                tag="message"
             )
-        self.scale.config(variable=tk.IntVar(value=hue_int))
-        self.change_matrix(hue_int)
-        self.mark_matrix(int(v/10), int(s/10))
 
 
     def draw_hue(self, frame):
