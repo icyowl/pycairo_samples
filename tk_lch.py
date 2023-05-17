@@ -140,6 +140,9 @@ if __name__ == "__main__":
     # lch = 60., 30., 18.
     # print(lch2rgb(lch))
 
+    # https://github.com/scikit-image/scikit-image/issues/4506
+
+    # https://github.com/scikit-image/scikit-image/blob/main/skimage/color/colorconv.py
 
     root = tk.Tk()
     app = Application(master = root)
