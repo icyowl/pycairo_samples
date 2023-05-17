@@ -16,13 +16,18 @@ def rgb2hex(rgb: tuple) -> str:
     rgb = tuple(round(x*255.) for x in rgb)
     return "#%02x%02x%02x" % rgb
 
-def hex2hsv(hex: str) -> tuple:
-    hx = hex.strip("#")
-    rgb = [int(x, 16) for x in (hx[:2], hx[2:4], hx[4:])]
-    rgb = [x/255. for x in rgb]
-    h, s, v = colorsys.rgb_to_hsv(*rgb)
+def hex2rgb(hex: str) -> tuple:
+    c = hex.strip("#")
+    rgb = [int(x, 16) for x in (c[:2], c[2:4], c[4:])]
+    return tuple(x/255. for x in rgb)
 
+def rgb2hsv(rgb: tuple) -> tuple:
+    h, s, v = colorsys.rgb_to_hsv(*rgb)
     return h*360., s*100., v*100.
+
+def rgb2hsl(rgb: tuple) -> tuple:
+    h, l, s = colorsys.rgb_to_hls(*rgb)
+    return h*360., s*100., l*100.
 
 class Application(tk.Frame):
     def __init__(self, master = None):
@@ -61,15 +66,16 @@ class Application(tk.Frame):
         self.entry.pack(side=tk.LEFT, padx=2)
         btn = tk.Button(frm_entry, text="submit", command=self.check_color)
         btn.pack(padx=2)
-        self.cvs = tk.Canvas(frm_canvas, width=180, height=50)
+        self.cel = tk.Canvas(frm_canvas, bg=self.default_bg, width=37, height=37)
+        self.cel.pack(side=tk.LEFT, padx=4)
+        self.cvs = tk.Canvas(frm_canvas, width=128, height=37)
         self.cvs.pack()
 
         self.draw_hue(frame_north_east)
-
         self.var_hue = tk.IntVar(value=0)
         self.scale_widget(frame_north_east)
 
-        self.canvas_draw(frame_south, 0)
+        self.draw_matrix(frame_south, 0)
         tk.Frame(frame_south, height=8).pack() # 下の余白
 
     def select_hsv(self):
@@ -84,28 +90,51 @@ class Application(tk.Frame):
         self.scale.config(variable=tk.IntVar(value=0))
         self.change_matrix(hue=0)
 
+    def select_func(self):
+        is_hsl = self.var_rb.get()
+        if is_hsl:
+            func = lambda x: hsl2rgb(x)
+        else:
+            func = lambda x: hsv2rgb(x)
+        
+        return func
+
     def check_color(self):
-        self.cvs.delete("message")
+        self.cvs.delete("all")
         hexcode = self.entry.get()
-        if re.fullmatch(r"[0-9|a-f]{6}", hexcode[1:]) and hexcode.startswith("#"):
-            h, s, v = hex2hsv(hexcode)
-            hue_int = round(h)
+        if re.fullmatch(r"[0-9|a-f|A-F]{6}", hexcode[1:]) and hexcode.startswith("#"):
+            self.cel.config(bg=hexcode)
+            rgb = hex2rgb(hexcode)
+            hsv = rgb2hsv(rgb)
+            hsl = rgb2hsl(rgb)
+            hue_int = round(hsv[0])
             self.cvs.create_text(
-                100, 
-                20, 
-                text=f"{round(h,2)},{round(s,2)}, {round(v,2)}", 
-                tag="message"
+                4, 
+                7, 
+                anchor=tk.NW,
+                text=f"HSV: {round(hsv[0],2)}, {round(hsv[1],2)}, {round(hsv[2],2)}"
+                )
+            self.cvs.create_text(
+                4, 
+                21, 
+                anchor=tk.NW,
+                text=f"HSL: {round(hsl[0],2)}, {round(hsl[1],2)}, {round(hsl[2],2)}"
                 )
             self.scale.config(variable=tk.IntVar(value=hue_int))
             self.change_matrix(hue_int)
-            self.mark_matrix(int(v/10), int(s/10))
+            if self.var_rb.get():
+                x, sat = hsl[2], hsl[1]
+            else:
+                x, sat = hsv[2], hsv[1]
+            self.mark_matrix(int(x/10), int(sat/10))
         else:
             self.cvs.create_text(
-                100,
-                20,
-                text="foo!",
-                tag="message"
+                4, 
+                7, 
+                anchor=tk.NW,
+                text="example -> #5F9EA0",
             )
+            self.cel.config(bg=self.default_bg)
 
 
     def draw_hue(self, frame):
@@ -117,7 +146,7 @@ class Application(tk.Frame):
             rgb = hsv2rgb(hsv)
             hue_canvas.create_line(i, 0, i, 47, width=1, fill=rgb2hex(rgb))
 
-    def canvas_draw(self, frame, hue):
+    def draw_matrix(self, frame, hue):
         frm = tk.Frame(frame)
         frm.pack(padx=4)
         lbl = tk.Label(frm, text="Saturation")
@@ -163,11 +192,7 @@ class Application(tk.Frame):
         self.scale.pack()
     
     def callback(self, event=None):
-        is_hsl = self.var_rb.get()
-        if is_hsl:
-            func = lambda x: hsl2rgb(x)
-        else:
-            func = lambda x: hsv2rgb(x)
+        func = self.select_func()
         self.scale.config(variable=self.var_hue)
         hue = self.var_hue.get()
         for i in range(11):
@@ -178,11 +203,7 @@ class Application(tk.Frame):
                 self.color_matrix[i][j].config(bg=rgb2hex(rgb))
         
     def change_matrix(self, hue):
-        is_hsl = self.var_rb.get()
-        if is_hsl:
-            func = lambda x: hsl2rgb(x)
-        else:
-            func = lambda x: hsv2rgb(x)
+        func = self.select_func()
         for i in range(11):
             for j in range(11):
                 hsv = hue, j*10, i*10

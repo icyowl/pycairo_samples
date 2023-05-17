@@ -1,6 +1,7 @@
 import colour
 import numpy as np
 from numpy.typing import ArrayLike
+from skimage import color
 import tkinter as tk
 
 
@@ -8,12 +9,32 @@ def lch2rgb(lch: ArrayLike) -> np.ndarray:
     lab = colour.LCHab_to_Lab(lch)
     xyz = colour.Lab_to_XYZ(lab)
     srgb = colour.XYZ_to_sRGB(xyz)
-
     return srgb
 
 def rgb2hex(srgb: ArrayLike) -> str:
     rgb = tuple(round(x*255.) for x in srgb)
     return "#%02x%02x%02x" % rgb
+
+
+def lch2rgb(lch: ArrayLike):
+    lab = color.lch2lab(lch)
+    # print("lab", lab)
+    lab = LCH_to_LAB(lch)
+    xyz = color.lab2xyz(lab)
+    rgb = color.xyz2rgb(xyz)
+    return rgb
+
+
+def LCH_to_LAB(lch: ArrayLike) -> np.ndarray:
+    l, c, h = lch
+    rad = h * np.pi / 180.
+    a = c*np.cos(rad)
+    b = c*np.sin(rad)
+
+    return np.array([l, a, b]) #, dtype=np.float64)
+
+
+
 
 func = np.vectorize(lambda x: 0. <= x <= 1.)
 
@@ -76,7 +97,6 @@ class Application(tk.Frame):
             for j in range(11):
                 sat = j*10
                 lch = val, sat, hue
-
                 rgb = lch2rgb(lch)
                 if func(rgb).sum() == 3:
                     color = rgb2hex(rgb)
@@ -116,6 +136,10 @@ class Application(tk.Frame):
 
 
 if __name__ == "__main__":
+    
+    # lch = 60., 30., 18.
+    # print(lch2rgb(lch))
+
 
     root = tk.Tk()
     app = Application(master = root)
