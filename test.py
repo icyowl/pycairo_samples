@@ -36,10 +36,30 @@ def make_lchs():
     t = time.time() - start
     print("end", round(t/60), "min", t%60, "sec")
 
+def LAB_to_LCH(lab) -> np.array:
+    l, a, b = lab
+    c = np.sqrt(a**2, b**2)
+    func = lambda rad: rad * 180 / np.pi
+    h = func(np.arctan2(b, a))
+
+    return np.array([l, c, h])
+
 
 if __name__ == "__main__":
     
-    ...
+    from skimage import color
+
+    all_rgb = np.stack(
+    np.meshgrid(*(np.arange(256, dtype=np.uint8),) * 3),
+        axis=-1,
+        ).reshape((2**12, 2**12, 3))
+    all_lab = color.rgb2lab(all_rgb)  # this will take a while
+    all_lch = color.lab2lch(all_lab)
+    # all_lch = np.array([LAB_to_LCH(x) for x in all_lab])
+    print(np.min(all_lch, axis=(0, 1)))
+    print(np.max(all_lch, axis=(0, 1)))
+
+
     # make_lchs()
 
     # p = "lch_df.pkl"

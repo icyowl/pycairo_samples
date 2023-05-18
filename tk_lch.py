@@ -4,12 +4,15 @@ from numpy.typing import ArrayLike
 from skimage import color
 import tkinter as tk
 
+import warnings
+# warnings.simplefilter('ignore')
+warnings.simplefilter('error')
 
-def lch2rgb(lch: ArrayLike) -> np.ndarray:
-    lab = colour.LCHab_to_Lab(lch)
-    xyz = colour.Lab_to_XYZ(lab)
-    srgb = colour.XYZ_to_sRGB(xyz)
-    return srgb
+# def lch2rgb(lch: ArrayLike) -> np.ndarray:
+#     lab = colour.LCHab_to_Lab(lch)
+#     xyz = colour.Lab_to_XYZ(lab)
+#     srgb = colour.XYZ_to_sRGB(xyz)
+#     return srgb
 
 def rgb2hex(srgb: ArrayLike) -> str:
     rgb = tuple(round(x*255.) for x in srgb)
@@ -17,11 +20,9 @@ def rgb2hex(srgb: ArrayLike) -> str:
 
 
 def lch2rgb(lch: ArrayLike):
-    lab = color.lch2lab(lch)
-    # print("lab", lab)
+    # lab = color.lch2lab(lch)
     lab = LCH_to_LAB(lch)
-    xyz = color.lab2xyz(lab)
-    rgb = color.xyz2rgb(xyz)
+    rgb = color.lab2rgb(lab)
     return rgb
 
 
@@ -32,8 +33,6 @@ def LCH_to_LAB(lch: ArrayLike) -> np.ndarray:
     b = c*np.sin(rad)
 
     return np.array([l, a, b]) #, dtype=np.float64)
-
-
 
 
 func = np.vectorize(lambda x: 0. <= x <= 1.)
@@ -64,12 +63,14 @@ class Application(tk.Frame):
         x = 0
         for i in range(360):
             lch = 60., 30., i
-            rgb = lch2rgb(lch)
-            if func(rgb).sum() == 3:
-                color = rgb2hex(rgb)
-            else:
-                color = None
-            canvas.create_line(x, 0, x, 64, width=1, fill=color)
+            bg_color = self.backgroundcolor
+            try:
+                rgb = lch2rgb(lch)
+                bg_color = rgb2hex(rgb)
+            except (TypeError, UserWarning):
+                ...
+
+            canvas.create_line(x, 0, x, 64, width=1, fill=bg_color)
             x += 1
 
     def canvas_draw(self, frame, hue):
@@ -94,16 +95,16 @@ class Application(tk.Frame):
             cc = tk.Canvas(frm, width=37, height=37)
             cc.create_text(20, 20, text=f"{i*10}%")
             cc.pack(padx=3, pady=3, side=tk.LEFT)
-            for j in range(11):
+            for j in range(15):
                 sat = j*10
                 lch = val, sat, hue
-                rgb = lch2rgb(lch)
-                if func(rgb).sum() == 3:
-                    color = rgb2hex(rgb)
-                else:
-                    color = self.backgroundcolor
-
-                canvas = tk.Canvas(frm, width=37, height=37, bg=color)
+                bg_color = self.backgroundcolor
+                try:
+                    rgb = lch2rgb(lch)
+                    bg_color = rgb2hex(rgb)
+                except (TypeError, UserWarning):
+                    ...
+                canvas = tk.Canvas(frm, width=37, height=37, bg=bg_color)
                 canvas.pack(padx=3, pady=3, side=tk.LEFT)
                 self.color_matrix[i].append(canvas)
 
@@ -125,14 +126,15 @@ class Application(tk.Frame):
     def callback(self, event=None):
         hue = self.var.get()
         for i in range(11):
-            for j in range(11):
+            for j in range(15):
                 lch = i*10, j*10, hue
-                rgb = lch2rgb(lch)
-                if func(rgb).sum() == 3:
-                    color = rgb2hex(rgb)
-                else:
-                    color = self.backgroundcolor
-                self.color_matrix[i][j].config(bg=color)
+                bg_color = self.backgroundcolor
+                try:
+                    rgb = lch2rgb(lch)
+                    bg_color = rgb2hex(rgb)
+                except (TypeError, UserWarning, DeprecationWarning) as e:
+                    ...
+                self.color_matrix[i][j].config(bg=bg_color)
 
 
 if __name__ == "__main__":
@@ -140,10 +142,9 @@ if __name__ == "__main__":
     # lch = 60., 30., 18.
     # print(lch2rgb(lch))
 
-    # https://github.com/scikit-image/scikit-image/issues/4506
-
-    # https://github.com/scikit-image/scikit-image/blob/main/skimage/color/colorconv.py
-
     root = tk.Tk()
     app = Application(master = root)
     app.mainloop()
+
+    # https://github.com/scikit-image/scikit-image/blob/main/skimage/color/colorconv.py
+
