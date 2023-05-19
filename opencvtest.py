@@ -35,7 +35,7 @@ def XYZ_to_LAB(xyz: ArrayLike) -> np.array:
 
 def LAB_to_LCH(lab: ArrayLike) -> np.array:
     l, a, b = lab
-    c = np.sqrt(a**2, b**2)
+    c = np.sqrt(a**2 + b**2)
     func = lambda rad: rad * 180 / np.pi
     h = func(np.arctan2(b, a))
 
