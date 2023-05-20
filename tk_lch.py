@@ -66,7 +66,7 @@ class Application(tk.Frame):
 
         style = ttk.Style()
         style.theme_use('classic')
-        style.configure('c.TButton', borderwidth=0, background=self.secondary)
+        style.configure('c.TButton', borderwidth=0, padding=[2], background=self.secondary)
 
         frame_N = tk.Frame(self.master, bg=self.primary)
         frame_S = tk.Frame(self.master)
@@ -98,37 +98,63 @@ class Application(tk.Frame):
         lbl.pack(side=tk.LEFT, padx=2, pady=4, anchor=tk.W)
         self.entry = tk.Entry(frm_entry, width=10, bg="#FFF")
         self.entry.pack(side=tk.LEFT, padx=2)
-        btn = ttk.Button(frm_entry, text="submit", style="c.TButton", command=self.color_entry)
+        btn = ttk.Button(
+            frm_entry, 
+            text="submit", 
+            style="c.TButton", 
+            command=self.color_entry
+            )
         btn.pack(padx=2)
-        self.canvas_2lch = tk.Canvas(frm_canvas, width=47, height=47)
+        self.canvas_2lch = tk.Canvas(frm_canvas, width=47, height=47, bg=self.secondary)
         self.canvas_2lch.pack(side=tk.LEFT, padx=4)
         self.lbl_2lch = tk.Label(frm_canvas, text="")
         self.lbl_2lch.pack(side=tk.LEFT)
 
+    def color_entry(self):
+        # Hex submit押した
+        self.lbl_2lch.config(text="")
+        hexrgb = self.entry.get()
+        if re.fullmatch(r"[0-9|a-f|A-F]{6}", hexrgb[1:]) and hexrgb.startswith("#"):
+            self.canvas_2lch.config(bg=hexrgb)
+            rgb = hex2rgb(hexrgb)
+            lch = rgb2lch(rgb)
+            hue_int = round(lch[2])
+            self.lbl_2lch.config(
+                text=f"{round(lch[0],2)}, {round(lch[1],2)}, {round(lch[2],2)}",
+                fg="#000"
+            )
+            self.var.set(value=hue_int)
+            self.change_matrix(hue_int)
+            i, j = lch[0], lch[1]
+            self.mark_matrix(int(i/10), int(j/10))
+        else:
+            self.lbl_2lch.config(text="example: #5F9EA0", fg=self.alert)
+            self.canvas_2lch.config(bg=self.secondary)
+
     def create_2colors(self, frame):
         frm = tk.Frame(frame)
-        tk.Label(frm, text="lch").pack(side=tk.LEFT)
+        tk.Label(frm, text="Lch").pack(side=tk.LEFT, padx=2)
         self.entry1 = tk.Entry(frm, width=16)
-        self.entry1.pack(side=tk.LEFT)
+        self.entry1.pack(side=tk.LEFT, padx=2)
         ttk.Button(frm, text="→", style="c.TButton", command=self.left_color).pack(side=tk.LEFT)
-        tk.Label(frm, text="hex").pack(side=tk.LEFT)
-        self.label1 = tk.Label(frm, text="#", anchor=tk.W, width=12)
+        tk.Label(frm, text="Hex").pack(side=tk.LEFT, padx=2)
+        self.label1 = tk.Label(frm, text="", anchor=tk.W, width=12)
         self.label1.pack(side=tk.LEFT)
-        frm.pack(anchor=tk.W, padx=16, pady=8)
+        frm.pack(anchor=tk.W, padx=8, pady=8)
 
         frm = tk.Frame(frame)
-        tk.Label(frm, text="lch").pack(side=tk.LEFT)
+        tk.Label(frm, text="Lch").pack(side=tk.LEFT, padx=2)
         self.entry2 = tk.Entry(frm, width=16)
-        self.entry2.pack(side=tk.LEFT)
+        self.entry2.pack(side=tk.LEFT, padx=2)
         ttk.Button(frm, text="→", style="c.TButton", command=self.right_color).pack(side=tk.LEFT)
-        tk.Label(frm, text="hex").pack(side=tk.LEFT)
-        self.label2 = tk.Label(frm, text="#", anchor=tk.W, width=12)
+        tk.Label(frm, text="Hex").pack(side=tk.LEFT, padx=2)
+        self.label2 = tk.Label(frm, text="", anchor=tk.W, width=12)
         self.label2.pack(side=tk.LEFT)
-        frm.pack(anchor=tk.W, padx=16, pady=8)
+        frm.pack(anchor=tk.W, padx=8, pady=8)
 
         frm = tk.Frame(frame)
         tk.Label(frm, width=4).pack(side=tk.LEFT, anchor=tk.W)
-        self.canvas2colors = tk.Canvas(frm, width=94, height=47)
+        self.canvas2colors = tk.Canvas(frm, width=94, height=47, bg=self.secondary)
         self.canvas2colors.pack(side=tk.LEFT, anchor=tk.W)
         frm.pack(anchor=tk.W)
 
@@ -151,23 +177,6 @@ class Application(tk.Frame):
 
         # color.deltaE_ciede2000(lab1, lab2) # 色差
 
-
-    def color_entry(self):
-        self.lbl_2lch.config(text="")
-        hexrgb = self.entry.get()
-        if re.fullmatch(r"[0-9|a-f|A-F]{6}", hexrgb[1:]) and hexrgb.startswith("#"):
-            self.canvas_2lch.config(bg=hexrgb)
-            rgb = hex2rgb(hexrgb)
-            lch = rgb2lch(rgb)
-            hue_int = round(lch[2])
-            self.lbl_2lch.config(text=f"{round(lch[0],2)}, {round(lch[1],2)}, {round(lch[2],2)}")
-            self.scale.config(variable=tk.IntVar(value=hue_int))
-            self.change_matrix(hue_int)
-            i, j = lch[0], lch[1]
-            self.mark_matrix(int(i/10), int(j/10))
-        else:
-            self.lbl_2lch.config(text="example: #5F9EA0", fg=self.alert)
-            self.canvas_2lch.config(bg=self.secondary)
 
     def hue_canvas(self, frame):
         tk.Label(frame, text="Hue: L=60, c=60").pack()
@@ -229,7 +238,6 @@ class Application(tk.Frame):
         self.scale.pack()
     
     def callback(self, event=None):
-        self.color_matrix
         hue = self.var.get()
         for i in range(11):
             for j in range(15):
