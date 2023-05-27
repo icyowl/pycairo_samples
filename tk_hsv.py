@@ -1,5 +1,6 @@
 import colorsys
 import os
+import re
 import tkinter as tk
 import tkinter.ttk as ttk
 
@@ -8,19 +9,29 @@ def hsv2rgb(hsv: tuple) -> tuple:
     rgb = colorsys.hsv_to_rgb(h/360., s/100., v/100.)
     return tuple(round(x*255.) for x in rgb)
 
-def hsl2rgb(hsl: tuple) -> tuple:
-    h, s, l = hsl 
-    rgb = colorsys.hsv_to_rgb(h/360., s/100., l/100.)
-    return tuple(round(x*255.) for x in rgb)
+def rgb2hsv(rgb: tuple) -> tuple:
+    r, g, b = [x/255. for x in rgb]
+    h, s, v = colorsys.rgb_to_hsv(r, g, b)
+    return h*360, s*100, v*100
 
 def rgb2hex(rgb: tuple) -> str:
     return "#%02x%02x%02x" % tuple(rgb)
+
+def hex2rgb(code: tuple) -> tuple:
+    c = code.strip("#")
+    r, g, b = [int(x, 16) for x in (c[:2], c[2:4], c[4:])]
+    return r, g, b
 
 def hsv2hex(hsv):
     rgb = hsv2rgb(hsv)
     return rgb2hex(rgb)
 
+def hex2hsv(code):
+    rgb = hex2rgb(code)
+    return rgb2hsv(rgb)
+
 def jpfont():
+    font = None
     if os.name == "posix":
         font = "Yu Gothic"
     return font
@@ -41,10 +52,14 @@ class Application(tk.Frame):
 
         frame_W = tk.Frame(self.master)
         frame_E = tk.Frame(self.master)
+        frame_NW = tk.Frame(frame_W)
+        frame_SW = tk.Frame(frame_W)
         frame_NE = tk.Frame(frame_E)
         frame_CE = tk.Frame(frame_E)
         frame_SE = tk.Frame(frame_E)
-        frame_W.pack(side=tk.LEFT)
+        frame_W.pack(side=tk.LEFT, anchor=tk.N)
+        frame_NW.pack()
+        frame_SW.pack()
         frame_E.pack()
         frame_NE.pack()
         frame_CE.pack()
@@ -54,35 +69,126 @@ class Application(tk.Frame):
         self.var_sat = tk.IntVar(value=50)
         self.var_val = tk.IntVar(value=50)
 
-        self.create_sample(frame_W)
+        self.create_sample(frame_NW)
+        self.create_entry(frame_SW)
+
+        self.draw_hue(frame_NE)
         self.create_scales(frame_CE)
         self.create_matrix(frame_SE, hue=180)
+        self.mark_matrix(50, 50)
+
+    def callback_(self):
+        hexrgb = self.entry.get()
+        if re.fullmatch(r"[0-9|a-f|A-F]{6}", hexrgb[1:]) and hexrgb.startswith("#"):
+            hue, sat, val = hex2hsv(hexrgb)
+            self.var_hue = tk.IntVar(value=round(hue))
+            self.var_sat = tk.IntVar(value=round(sat))
+            self.var_val = tk.IntVar(value=round(val))
+            self.scale_h.config(variable=self.var_hue)
+            self.scale_s.config(variable=self.var_sat)
+            self.scale_v.config(variable=self.var_val)
+            self.change_matrix(hue)
+            self.mark_matrix(sat, val)
+            self.cv_sample.itemconfigure(self.header, outline=hsv2hex([hue, sat, val]), fill=hsv2hex([hue, sat, val]))
+            self.cv_sample.itemconfigure(self.title, fill=hsv2hex([hue, 1.0, 99.0]))
+            self.cv_sample.itemconfigure(self.body, outline=hsv2hex([hue,4.0, 98.0]), fill=hsv2hex([hue, 4.0, 98.0]))
+            self.cv_sample.itemconfigure(self.text, text=f"primary color {hsv2hex([hue, sat, val])}")
+        else:
+            ...
+            # self.lbl_2lch.config(text="example: #5F9EA0", fg=self.alert)
+            # self.canvas_2lch.config(bg=self.secondary)
+
+    def create_entry(self, frame):
+        frm_entry = tk.Frame(frame)
+        frm_entry.pack(padx=8, pady=16)
+        tk.Label(frm_entry, text="Hex").pack(side=tk.LEFT)
+        self.entry = tk.Entry(frm_entry, width=10, bg="#fff")
+        self.entry.pack(side=tk.LEFT, padx=2)
+        btn = ttk.Button(
+            frm_entry, 
+            text="submit", 
+            style="c.TButton", 
+            command=self.callback_
+            )
+        btn.pack(padx=2)
+
+    def draw_hue(self, frame):
+        tk.Label(frame, text="").pack(side=tk.LEFT, padx=18)
+        hue_canvas = tk.Canvas(frame, width=360, height=27)
+        hue_canvas.pack()
+        for i in range(360):
+            hsv = i, 100., 100.
+            hue_canvas.create_line(i, 0, i, 47, width=1, fill=hsv2hex(hsv))
 
     def create_sample(self, frame):
-        self.canvas = tk.Canvas(frame, width=380, height=100)
-        self.canvas.pack()
-        self.rect = self.canvas.create_rectangle(10.0, 10.0, 580.0, 90.0, outline=hsv2hex((180, 50, 50)), fill=hsv2hex((180, 50, 50)))
-        self.canvas.create_text(180.0, 50.0, text="日本語のTitle", font=("YuGo-Bold","24"))
+        self.cv_sample = tk.Canvas(frame) #, width=380, height=100)
+        self.cv_sample.pack()
+        hue, sat, val = self.var_hue.get(), self.var_sat.get(), self.var_val.get()
+        self.header = self.cv_sample.create_rectangle(
+            10.0, 
+            10.0, 
+            380.0, 
+            90.0, 
+            outline=hsv2hex([hue, sat, val]), 
+            fill=hsv2hex([hue, sat, val])
+            )
+        self.title = self.cv_sample.create_text(
+            180.0, 
+            50.0, 
+            text="日本語のTitle", 
+            font=("Yu Gothic","18"), 
+            fill=hsv2hex([hue, 1.0, 99.0])
+            )
+        self.body = self.cv_sample.create_rectangle(
+            10.0,
+            94.0,
+            380.0,
+            1200.0,
+            outline=hsv2hex([hue, 4.0, 98.0]),
+            fill=hsv2hex([hue, 4.0, 98.0])
+        )
+        self.text = self.cv_sample.create_text(
+            128.0,
+            126.0,
+            text=f"primary color {hsv2hex([hue, sat, val])}",
+            font=("Yu Gothic", "12"),
+            fill="#000"
+        )
+
 
     def callback(self, event=None):
         hue, sat, val = self.var_hue.get(), self.var_sat.get(), self.var_val.get()
-        self.canvas.itemconfigure(self.rect, fill=hsv2hex([hue, sat, val]))
+        self.cv_sample.itemconfigure(self.header, outline=hsv2hex([hue, sat, val]), fill=hsv2hex([hue, sat, val]))
+        self.cv_sample.itemconfigure(self.title, fill=hsv2hex([hue, 1.0, 99.0]))
+        self.cv_sample.itemconfigure(self.body, outline=hsv2hex([hue,4.0, 98.0]), fill=hsv2hex([hue, 4.0, 98.0]))
+        self.cv_sample.itemconfigure(self.text, text=f"primary color {hsv2hex([hue, sat, val])}")
         self.change_matrix(hue)
-        # self.mark_matrix(i, j=int(val/100))
+        self.mark_matrix(sat, val)
+        # print(hsv2hex([hue, sat, val]))
 
-    def create_scales(self, flame):
-        self.scale_h = tk.Scale(flame, variable=self.var_hue, command=self.callback, orient=tk.HORIZONTAL, 
+    def create_scales(self, frame):
+        frm_hue = tk.Frame(frame)
+        tk.Label(frm_hue, text="hue").pack(side=tk.LEFT, padx=8)
+        self.scale_h = tk.Scale(frm_hue, variable=self.var_hue, command=self.callback, orient=tk.HORIZONTAL, 
                     length=360, width=8, sliderlength=8, from_=0, to=360, resolution=1, tickinterval=100
                     )
         self.scale_h.pack()
-        self.scale_s = tk.Scale(flame, variable=self.var_sat, command=self.callback, orient=tk.HORIZONTAL, 
+        frm_hue.pack()
+        frm_sat = tk.Frame(frame)
+        tk.Label(frm_sat, text="sat").pack(side=tk.LEFT, padx=8)
+        self.scale_s = tk.Scale(frm_sat, variable=self.var_sat, command=self.callback, orient=tk.HORIZONTAL, 
                     length=360, width=8, sliderlength=8, from_=0, to=100, resolution=1, tickinterval=50
                     )
         self.scale_s.pack()
-        self.scale_v = tk.Scale(flame, variable=self.var_val, command=self.callback, orient=tk.HORIZONTAL, 
+        frm_sat.pack()
+        frm_val = tk.Frame(frame)
+        tk.Label(frm_val, text="val").pack(side=tk.LEFT, padx=8)
+        self.scale_v = tk.Scale(frm_val, variable=self.var_val, command=self.callback, orient=tk.HORIZONTAL, 
                     length=360, width=8, sliderlength=8, from_=0, to=100, resolution=1, tickinterval=50
                     )
         self.scale_v.pack()
+        frm_val.pack()
+
 
     def create_matrix(self, frame, hue):
         frm = tk.Frame(frame)
@@ -120,10 +226,12 @@ class Application(tk.Frame):
                 self.matrix[i][j].delete("mark")
                 self.matrix[i][j].config(bg=hsv2hex(hsv))
 
-    def mark_matrix(self, i, j):
+    def mark_matrix(self, sat, val):
+        i = int(val/10)
+        j = int(sat/10)
         this_color = self.matrix[i][j].cget("bg")
         self.matrix[i][j].config(bg="black")
-        self.matrix[i][j].create_rectangle(4, 4, 26, 26, fill=this_color, outline="white", tag="mark")
+        self.matrix[i][j].create_rectangle(4, 4, 26, 26, fill=this_color, outline="#fff", tag="mark")
 
 
 
