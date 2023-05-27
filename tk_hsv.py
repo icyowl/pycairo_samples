@@ -1,5 +1,7 @@
 import colorsys
+import os
 import tkinter as tk
+import tkinter.ttk as ttk
 
 def hsv2rgb(hsv: tuple) -> tuple:
     h, s, v = hsv
@@ -14,91 +16,115 @@ def hsl2rgb(hsl: tuple) -> tuple:
 def rgb2hex(rgb: tuple) -> str:
     return "#%02x%02x%02x" % tuple(rgb)
 
+def hsv2hex(hsv):
+    rgb = hsv2rgb(hsv)
+    return rgb2hex(rgb)
+
+def jpfont():
+    if os.name == "posix":
+        font = "Yu Gothic"
+    return font
+
 class Application(tk.Frame):
     def __init__(self, master = None):
         super().__init__(master)
 
-        self.master.title("HSV Model")
+        self.master.title("HSV Model for Web Page")
+        self.primary = "#FDFDFD" # < gray 50
+        self.secondary = "#F5F5F5" # gray 100
+        self.alert = "#EF5350" # red 400
+        self.master.tk_setPalette(background=self.primary)
 
-        frame_c = tk.Frame(self.master)
-        frame_c.pack()
-        self.hue_canvas(frame_c)
+        style = ttk.Style()
+        style.theme_use('classic')
+        style.configure('c.TButton', borderwidth=0, padding=[2], background=self.secondary)
 
-        frame_u = tk.Frame(self.master)
-        frame_u.pack()
-        self.var = tk.IntVar(value=0)
-        self.scale_widget(frame_u)
+        frame_W = tk.Frame(self.master)
+        frame_E = tk.Frame(self.master)
+        frame_NE = tk.Frame(frame_E)
+        frame_CE = tk.Frame(frame_E)
+        frame_SE = tk.Frame(frame_E)
+        frame_W.pack(side=tk.LEFT)
+        frame_E.pack()
+        frame_NE.pack()
+        frame_CE.pack()
+        frame_SE.pack()
 
-        self.frame_d = tk.Frame(self.master)
-        self.frame_d.pack(padx=10, pady=10)
-        self.canvas_draw(self.frame_d, 0)
+        self.var_hue = tk.IntVar(value=180)
+        self.var_sat = tk.IntVar(value=50)
+        self.var_val = tk.IntVar(value=50)
 
-    def hue_canvas(self, frame):
-        canvas = tk.Canvas(frame, width=360, height=47)
-        canvas.pack()
-        x = 0
-        for i in range(360):
-            hsv = i, 100., 50.
-            rgb = hsv2rgb(hsv)
-            canvas.create_line(x, 0, x, 64, width=1, fill=rgb2hex(rgb))
-            x += 1
+        self.create_sample(frame_W)
+        self.create_scales(frame_CE)
+        self.create_matrix(frame_SE, hue=180)
 
-    def canvas_draw(self, frame, hue):
+    def create_sample(self, frame):
+        self.canvas = tk.Canvas(frame, width=380, height=100)
+        self.canvas.pack()
+        self.rect = self.canvas.create_rectangle(10.0, 10.0, 580.0, 90.0, outline=hsv2hex((180, 50, 50)), fill=hsv2hex((180, 50, 50)))
+        self.canvas.create_text(180.0, 50.0, text="日本語のTitle", font=("YuGo-Bold","24"))
+
+    def callback(self, event=None):
+        hue, sat, val = self.var_hue.get(), self.var_sat.get(), self.var_val.get()
+        self.canvas.itemconfigure(self.rect, fill=hsv2hex([hue, sat, val]))
+        self.change_matrix(hue)
+        # self.mark_matrix(i, j=int(val/100))
+
+    def create_scales(self, flame):
+        self.scale_h = tk.Scale(flame, variable=self.var_hue, command=self.callback, orient=tk.HORIZONTAL, 
+                    length=360, width=8, sliderlength=8, from_=0, to=360, resolution=1, tickinterval=100
+                    )
+        self.scale_h.pack()
+        self.scale_s = tk.Scale(flame, variable=self.var_sat, command=self.callback, orient=tk.HORIZONTAL, 
+                    length=360, width=8, sliderlength=8, from_=0, to=100, resolution=1, tickinterval=50
+                    )
+        self.scale_s.pack()
+        self.scale_v = tk.Scale(flame, variable=self.var_val, command=self.callback, orient=tk.HORIZONTAL, 
+                    length=360, width=8, sliderlength=8, from_=0, to=100, resolution=1, tickinterval=50
+                    )
+        self.scale_v.pack()
+
+    def create_matrix(self, frame, hue):
         frm = tk.Frame(frame)
-        frm.pack()
+        frm.pack(padx=4)
         lbl = tk.Label(frm, text="Saturation")
         lbl.pack()
-        c = tk.Canvas(frm, width=37, height=20)
-        c.create_text(20, 14, text="Value")
-        c.pack(padx=3, side=tk.LEFT)
-        for i in range(11):
-            canvas = tk.Canvas(frm, width=37, height=20)
-            canvas.create_text(20, 12, text=f"{i*10}%")
-            canvas.pack(padx=3, side=tk.LEFT)
+        self.lightness = tk.Canvas(frm, width=37, height=20)
+        self.lightness.create_text(20, 15, text="Value")
+        self.lightness.pack(padx=3, side=tk.LEFT)
 
-        self.color_matrix = [[] for _ in range(11)]
+        for i in range(11):
+            xlim = tk.Canvas(frm, width=27, height=20)
+            xlim.create_text(16, 12, text=f"{i*10}")
+            xlim.pack(padx=3, side=tk.LEFT)
+
+        self.matrix = [[] for _ in range(11)]
         for i in range(11):
             val = i*10
-            text = "V=" + str(val).rjust(3, " ") + "%"
             frm = tk.Frame(frame)
             frm.pack()
-            cc = tk.Canvas(frm, width=37, height=37)
-            cc.create_text(20, 20, text=f"{i*10}%")
-            cc.pack(padx=3, pady=3, side=tk.LEFT)
+            ylim = tk.Canvas(frm, width=37, height=27)
+            ylim.create_text(20, 15, text=f"{i*10}")
+            ylim.pack(padx=3, pady=3, side=tk.LEFT)
             for j in range(11):
                 sat = j*10
                 hsv = hue, sat, val
-                rgb = hsv2rgb(hsv)
-                canvas = tk.Canvas(frm, width=37, height=37, bg=rgb2hex(rgb))
+                canvas = tk.Canvas(frm, width=27, height=27, bg=hsv2hex(hsv))
                 canvas.pack(padx=3, pady=3, side=tk.LEFT)
-                self.color_matrix[i].append(canvas)
+                self.matrix[i].append(canvas)
 
-    def scale_widget(self, flame):
-        scale = tk.Scale(flame, 
-                    variable = self.var, 
-                    command = self.callback,
-                    orient=tk.HORIZONTAL, 
-                    length = 360,
-                    width = 12,
-                    sliderlength = 10,    # スライダー（つまみ）の幅
-                    from_ = 0,
-                    to = 360,
-                    resolution=1,         # 変化の分解能(初期値:1)
-                    tickinterval=100      # 目盛りの分解能(初期値0で表示なし)
-                    )
-        scale.pack()
-    
-    def callback(self, event=None):
-        hue = self.var.get()
+    def change_matrix(self, hue):
         for i in range(11):
             for j in range(11):
                 hsv = hue, j*10, i*10
-                rgb = hsv2rgb(hsv)
-                self.color_matrix[i][j].config(bg=rgb2hex(rgb))
-        res = self.color_matrix[3][3].cget("bg")
-        self.color_matrix[3][3].config(bg="black")
-        self.color_matrix[3][3].create_rectangle(4, 4, 36, 36, fill=res, outline="white")
-        
+                self.matrix[i][j].delete("mark")
+                self.matrix[i][j].config(bg=hsv2hex(hsv))
+
+    def mark_matrix(self, i, j):
+        this_color = self.matrix[i][j].cget("bg")
+        self.matrix[i][j].config(bg="black")
+        self.matrix[i][j].create_rectangle(4, 4, 26, 26, fill=this_color, outline="white", tag="mark")
+
 
 
 if __name__ == "__main__":
