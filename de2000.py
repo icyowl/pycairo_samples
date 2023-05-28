@@ -15,6 +15,14 @@ def rgb2lab(rgb):
 def ciede2000(rgb1, rgb2):
     return color.deltaE_ciede2000(rgb2lab(rgb1), rgb2lab(rgb2))
 
+bg_primary = "#cfd8dc"
+
+pyg_name = 198 # bluegray
+pyg_keyw = 72 # yellow
+
+
+
+
 bluegray = {
     50: "#eceff1",
     100: "#cfd8dc",
