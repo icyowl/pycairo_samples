@@ -30,13 +30,14 @@ def hex2hsv(code):
     rgb = hex2rgb(code)
     return rgb2hsv(rgb)
 
-def jpfont():
-    font = None
-    if os.name == "posix":
-        font = "Yu Gothic"
-    return font
+BG_sat, BG_val = 0.0, 98.0
+TXT_sat, TXT_val = 1.0, 99.0
+TXT_sat, TXT_val = 30.0, 30.0
 
 class Application(tk.Frame):
+
+    BG_sat, BG_val = 1.0, 99.0
+
     def __init__(self, master = None):
         super().__init__(master)
 
@@ -69,13 +70,22 @@ class Application(tk.Frame):
         self.var_sat = tk.IntVar(value=50)
         self.var_val = tk.IntVar(value=50)
 
+        tk.Label(frame_NW).pack()
         self.create_sample(frame_NW)
         self.create_entry(frame_SW)
 
+        tk.Label(frame_NE).pack()
         self.draw_hue(frame_NE)
         self.create_scales(frame_CE)
         self.create_matrix(frame_SE, hue=180)
         self.mark_matrix(50, 50)
+        tk.Label(frame_SE).pack()
+
+    def text_color(self, sat, val):
+        ...
+
+    def background_color(self, sat, val):
+        ...
 
     def callback_(self):
         hexrgb = self.entry.get()
@@ -90,8 +100,8 @@ class Application(tk.Frame):
             self.change_matrix(hue)
             self.mark_matrix(sat, val)
             self.cv_sample.itemconfigure(self.header, outline=hsv2hex([hue, sat, val]), fill=hsv2hex([hue, sat, val]))
-            self.cv_sample.itemconfigure(self.title, fill=hsv2hex([hue, 1.0, 99.0]))
-            self.cv_sample.itemconfigure(self.body, outline=hsv2hex([hue,4.0, 98.0]), fill=hsv2hex([hue, 4.0, 98.0]))
+            self.cv_sample.itemconfigure(self.title, fill=hsv2hex([hue, TXT_sat, TXT_val]))
+            self.cv_sample.itemconfigure(self.body, outline=hsv2hex([hue, BG_sat, BG_val]), fill=hsv2hex([hue, BG_sat, BG_val]))
             self.cv_sample.itemconfigure(self.text, text=f"primary color {hsv2hex([hue, sat, val])}")
         else:
             ...
@@ -121,7 +131,7 @@ class Application(tk.Frame):
             hue_canvas.create_line(i, 0, i, 47, width=1, fill=hsv2hex(hsv))
 
     def create_sample(self, frame):
-        self.cv_sample = tk.Canvas(frame) #, width=380, height=100)
+        self.cv_sample = tk.Canvas(frame, width=380, height=380)
         self.cv_sample.pack()
         hue, sat, val = self.var_hue.get(), self.var_sat.get(), self.var_val.get()
         self.header = self.cv_sample.create_rectangle(
@@ -133,23 +143,23 @@ class Application(tk.Frame):
             fill=hsv2hex([hue, sat, val])
             )
         self.title = self.cv_sample.create_text(
-            180.0, 
+            190.0, 
             50.0, 
             text="日本語のTitle", 
             font=("Yu Gothic","18"), 
-            fill=hsv2hex([hue, 1.0, 99.0])
+            fill=hsv2hex([hue, TXT_sat, TXT_val])
             )
         self.body = self.cv_sample.create_rectangle(
             10.0,
             94.0,
             380.0,
-            1200.0,
-            outline=hsv2hex([hue, 4.0, 98.0]),
-            fill=hsv2hex([hue, 4.0, 98.0])
+            380.0,
+            outline=hsv2hex([hue, BG_sat, BG_val]),
+            fill=hsv2hex([hue, BG_sat, BG_val])
         )
         self.text = self.cv_sample.create_text(
-            128.0,
-            126.0,
+            190.0,
+            120.0,
             text=f"primary color {hsv2hex([hue, sat, val])}",
             font=("Yu Gothic", "12"),
             fill="#000"
@@ -159,8 +169,8 @@ class Application(tk.Frame):
     def callback(self, event=None):
         hue, sat, val = self.var_hue.get(), self.var_sat.get(), self.var_val.get()
         self.cv_sample.itemconfigure(self.header, outline=hsv2hex([hue, sat, val]), fill=hsv2hex([hue, sat, val]))
-        self.cv_sample.itemconfigure(self.title, fill=hsv2hex([hue, 1.0, 99.0]))
-        self.cv_sample.itemconfigure(self.body, outline=hsv2hex([hue,4.0, 98.0]), fill=hsv2hex([hue, 4.0, 98.0]))
+        self.cv_sample.itemconfigure(self.title, fill=hsv2hex([hue, TXT_sat, TXT_val]))
+        self.cv_sample.itemconfigure(self.body, outline=hsv2hex([hue, BG_sat, BG_val]), fill=hsv2hex([hue, BG_sat, BG_val]))
         self.cv_sample.itemconfigure(self.text, text=f"primary color {hsv2hex([hue, sat, val])}")
         self.change_matrix(hue)
         self.mark_matrix(sat, val)
@@ -231,9 +241,10 @@ class Application(tk.Frame):
         j = int(sat/10)
         this_color = self.matrix[i][j].cget("bg")
         self.matrix[i][j].config(bg="black")
-        self.matrix[i][j].create_rectangle(4, 4, 26, 26, fill=this_color, outline="#fff", tag="mark")
-
-
+        gap = 4
+        if os.name == "posix":
+            gap = 6
+        self.matrix[i][j].create_rectangle(gap, gap, 26, 26, fill=this_color, outline="#fff", tag="mark")
 
 if __name__ == "__main__":
 
