@@ -51,6 +51,7 @@ class Application(tk.Frame):
 
         frame_W = tk.Frame(self.master)
         frame_E = tk.Frame(self.master)
+        frame_NNW = tk.Frame(frame_W)
         frame_NW = tk.Frame(frame_W)
         frame_SW = tk.Frame(frame_W)
         frame_NE = tk.Frame(frame_E)
@@ -85,7 +86,7 @@ class Application(tk.Frame):
     def background_color(self, sat, val):
         ...
 
-    def callback_(self):
+    def entry_callback(self):
         hexrgb = self.entry.get()
         if re.fullmatch(r"[0-9|a-f|A-F]{6}", hexrgb[1:]) and hexrgb.startswith("#"):
             hue, sat, val = hex2hsv(hexrgb)
@@ -116,7 +117,7 @@ class Application(tk.Frame):
             frm_entry, 
             text="submit", 
             style="c.TButton", 
-            command=self.callback_
+            command=self.entry_callback
             )
         btn.pack(padx=2)
 
@@ -128,30 +129,40 @@ class Application(tk.Frame):
             hsv = i, 100., 100.
             hue_canvas.create_line(i, 0, i, 47, width=1, fill=hsv2hex(hsv))
 
+
     def create_sample(self, frame):
         self.cv_sample = tk.Canvas(frame, width=380, height=380)
         self.cv_sample.pack()
         hue, sat, val = self.var_hue.get(), self.var_sat.get(), self.var_val.get()
         h, s, v = 198, 8, 86
+        self.navbar = self.cv_sample.create_rectangle(
+            10.0,
+            0.0,
+            380.0,
+            20.0,
+            outline=hsv2hex([h, s, v]), 
+            fill=hsv2hex([h, s, v]),
+        )
+        print(hsv2hex([h, s, v]))
         self.header = self.cv_sample.create_rectangle(
             10.0, 
-            10.0, 
+            20.0, 
             380.0, 
             90.0, 
             outline=hsv2hex([h, s, v]), 
             fill=hsv2hex([h, s, v])
-            )
+        )
         self.title = self.cv_sample.create_text(
             190.0, 
-            40.0, 
+            45.0, 
             text="日本語のTitle", 
             font=("Yu Gothic","18", "bold"), 
             fill=hsv2hex([200., 26., 32.]) # #3c4b52
-            )
+        )
         self.link = self.cv_sample.create_text(
             190.0,
             70.0,
-            font=("Verdana", "10", "bold"),
+            font=("Verdana", "12", "normal"),
             text="Home Blog Project About",
             fill=hsv2hex([200., 39., 41.]) # #405b69
         )
@@ -174,11 +185,13 @@ class Application(tk.Frame):
 
     def callback(self, event=None):
         hue, sat, val = self.var_hue.get(), self.var_sat.get(), self.var_val.get()
+        self.cv_sample.itemconfigure(self.navbar, outline=hsv2hex([hue, sat, val]), fill=hsv2hex([hue, sat, val]))
+        print(hsv2hex([hue, sat, val]))
         # self.cv_sample.itemconfigure(self.header, outline=hsv2hex([hue, sat, val]), fill=hsv2hex([hue, sat, val]))
         # self.cv_sample.itemconfigure(self.title, fill=hsv2hex([hue, sat, val]))
-        self.cv_sample.itemconfigure(self.link, fill=hsv2hex([hue, sat, val]))
+        # self.cv_sample.itemconfigure(self.link, fill=hsv2hex([hue, sat, val]))
         self.cv_sample.itemconfigure(self.body, outline=hsv2hex([198, BG_sat, BG_val]), fill=hsv2hex([198, BG_sat, BG_val]))
-        self.cv_sample.itemconfigure(self.text, text=f"primary color {hsv2hex([hue, sat, val])}")
+        # self.cv_sample.itemconfigure(self.text, text=f"primary color {hsv2hex([hue, sat, val])}")
         self.change_matrix(hue)
         self.mark_matrix(sat, val)
         # print(hsv2hex([hue, sat, val]))
