@@ -134,7 +134,7 @@ class Application(tk.Frame):
         self.cv_sample = tk.Canvas(frame, width=380, height=380)
         self.cv_sample.pack()
         hue, sat, val = self.var_hue.get(), self.var_sat.get(), self.var_val.get()
-        h, s, v = 198, 8, 86
+        h, s, v = 204, 2, 95
         self.navbar = self.cv_sample.create_rectangle(
             10.0,
             0.0,
