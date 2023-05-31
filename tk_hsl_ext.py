@@ -173,6 +173,7 @@ class Application(tk.Frame):
             text=f"primary color {hsl2hex([hue, sat, val])}",
             font=("Yu Gothic", "12"),
             fill="#000"
+        
         )
 
 
