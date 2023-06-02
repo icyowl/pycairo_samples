@@ -30,10 +30,6 @@ def hex2hsl(code):
     rgb = hex2rgb(code)
     return rgb2hsl(rgb)
 
-BG_sat, BG_val = 0.0, 98.0
-TXT_sat, TXT_val = 1.0, 99.0
-TXT_sat, TXT_val = 30.0, 30.0
-
 class Application(tk.Frame):
 
     def __init__(self, master = None):
@@ -67,7 +63,7 @@ class Application(tk.Frame):
 
         self.var_hue = tk.IntVar(value=180)
         self.var_sat = tk.IntVar(value=50)
-        self.var_val = tk.IntVar(value=50)
+        self.var_lit = tk.IntVar(value=50)
 
         tk.Label(frame_NW).pack()
         self.create_sample(frame_NW)
@@ -83,19 +79,21 @@ class Application(tk.Frame):
     def entry_callback(self):
         hexrgb = self.entry.get()
         if re.fullmatch(r"[0-9|a-f|A-F]{6}", hexrgb[1:]) and hexrgb.startswith("#"):
-            hue, sat, val = hex2hsl(hexrgb)
+            hue, sat, lit = hex2hsl(hexrgb)
             self.var_hue = tk.IntVar(value=round(hue))
             self.var_sat = tk.IntVar(value=round(sat))
-            self.var_val = tk.IntVar(value=round(val))
+            self.var_lit = tk.IntVar(value=round(lit))
             self.scale_h.config(variable=self.var_hue)
             self.scale_s.config(variable=self.var_sat)
-            self.scale_v.config(variable=self.var_val)
+            self.scale_v.config(variable=self.var_lit)
             self.change_matrix(hue)
-            self.mark_matrix(sat, val)
-            self.cv_sample.itemconfigure(self.header, outline=hsl2hex([hue, sat, val]), fill=hsl2hex([hue, sat, val]))
-            self.cv_sample.itemconfigure(self.title, fill=hsl2hex([hue, TXT_sat, TXT_val]))
-            self.cv_sample.itemconfigure(self.body, outline=hsl2hex([hue, BG_sat, BG_val]), fill=hsl2hex([hue, BG_sat, BG_val]))
-            self.cv_sample.itemconfigure(self.text, text=f"primary color {hsl2hex([hue, sat, val])}")
+            self.mark_matrix(sat, lit)
+            self.cv_sample.itemconfigure(self.navbar, outline=hsl2hex([hue, sat, lit]), fill=hsl2hex([hue, sat, lit]))    
+            self.cv_sample.itemconfigure(self.header, outline=hsl2hex([hue, sat, lit]), fill=hsl2hex([hue, sat, lit]))
+            self.cv_sample.itemconfigure(self.title, fill=hsl2hex([hue, sat, lit]))
+            self.cv_sample.itemconfigure(self.link, fill=hsl2hex([hue, sat, lit]))
+            self.cv_sample.itemconfigure(self.body, outline=hsl2hex([hue, sat, lit]), fill=hsl2hex([hue, sat, lit]))
+            self.cv_sample.itemconfigure(self.text, text=f"target color {hsl2hex([hue, sat, lit])}")
         else:
             ...
             # self.lbl_2lch.config(text="example: #5F9EA0", fg=self.alert)
@@ -127,50 +125,49 @@ class Application(tk.Frame):
     def create_sample(self, frame):
         self.cv_sample = tk.Canvas(frame, width=380, height=380)
         self.cv_sample.pack()
-        hue, sat, val = self.var_hue.get(), self.var_sat.get(), self.var_val.get()
-        h, s, l = 202, 19, 83
+        hue, sat, lit = self.var_hue.get(), self.var_sat.get(), self.var_lit.get()
         self.navbar = self.cv_sample.create_rectangle(
             10.0,
             0.0,
             380.0,
             20.0,
-            outline=hsl2hex([h, s, l]), 
-            fill=hsl2hex([h, s, l]),
+            outline=hsl2hex([hue, sat-10, lit]), 
+            fill=hsl2hex([hue, sat-10, lit]),
         )
         self.header = self.cv_sample.create_rectangle(
             10.0, 
             20.0, 
             380.0, 
             90.0, 
-            outline=hsl2hex([h, s, l]), 
-            fill=hsl2hex([h, s, l])
+            outline=hsl2hex([hue, sat, lit]), 
+            fill=hsl2hex([hue, sat, lit])
         )
         self.title = self.cv_sample.create_text(
             190.0, 
             45.0, 
             text="日本語のTitle", 
             font=("Yu Gothic","18", "bold"), 
-            fill=hsl2hex([200., 26., 32.]) # #3c4b52
+            fill=hsl2hex([hue, sat+40, lit])
         )
         self.link = self.cv_sample.create_text(
             190.0,
             70.0,
             font=("Verdana", "12", "normal"),
             text="Home Blog Project About",
-            fill=hsl2hex([200., 39., 41.]) # #405b69
+            fill=hsl2hex([hue, sat+30, lit])
         )
         self.body = self.cv_sample.create_rectangle(
             10.0,
             94.0,
             380.0,
             380.0,
-            outline=hsl2hex([hue, BG_sat, BG_val]),
-            fill=hsl2hex([hue, BG_sat, BG_val])
+            outline=hsl2hex([hue, sat-30, lit+30]),
+            fill=hsl2hex([hue, sat-30, lit+30])
         )
         self.text = self.cv_sample.create_text(
             190.0,
             120.0,
-            text=f"primary color {hsl2hex([hue, sat, val])}",
+            text=f"target color {hsl2hex([hue, sat, lit])}",
             font=("Yu Gothic", "12"),
             fill="#000"
         
@@ -178,19 +175,22 @@ class Application(tk.Frame):
 
 
     def callback(self, event=None):
-        hue, sat, val = self.var_hue.get(), self.var_sat.get(), self.var_val.get()
-        h, s, l = 202, 19, 83
-        self.cv_sample.itemconfigure(self.navbar, outline=hsl2hex([h, s, l]), fill=hsl2hex([h, s, l]))
-        self.cv_sample.itemconfigure(self.header, outline=hsl2hex([h, s, l]), fill=hsl2hex([h, s, l]))
+        hue, sat, lit = 203, 26, 92 #e5ecf0
+        # 182, 18, 92 # e7eeee
+        self.cv_sample.itemconfigure(self.navbar, outline=hsl2hex([hue, sat, lit]), fill=hsl2hex([hue, sat, lit]))
+        self.cv_sample.itemconfigure(self.header, outline=hsl2hex([hue, sat, lit]), fill=hsl2hex([hue, sat, lit]))
+        hue, sat, lit = 201, 16, 28
+        self.cv_sample.itemconfigure(self.title, fill=hsl2hex([hue, sat, lit]))
+        hue, sat, lit = self.var_hue.get(), self.var_sat.get(), self.var_lit.get()
+        self.cv_sample.itemconfigure(self.link, fill=hsl2hex([hue, sat, lit]))
+
+        hue, sat, lit = self.var_hue.get(), self.var_sat.get(), self.var_lit.get()
+        self.cv_sample.itemconfigure(self.body, outline=hsl2hex([hue, sat, lit]), fill=hsl2hex([hue, sat, lit]))
         
-        self.cv_sample.itemconfigure(self.title, fill=hsl2hex([hue, sat, val]))
-        # self.cv_sample.itemconfigure(self.link, fill=hsl2hex([hue, sat, val]))
-        # self.cv_sample.itemconfigure(self.body, outline=hsl2hex([198, BG_sat, BG_val]), fill=hsl2hex([198, BG_sat, BG_val]))
-        
-        # self.cv_sample.itemconfigure(self.text, text=f"Target color {hsl2hex([hue, sat, val])}")
+
+        self.cv_sample.itemconfigure(self.text, text=f"target color {hsl2hex([hue, sat, lit])}")
         self.change_matrix(hue)
-        self.mark_matrix(sat, val)
-        # print(hsl2hex([hue, sat, val]))
+        self.mark_matrix(sat, lit)
 
     def create_scales(self, frame):
         frm_hue = tk.Frame(frame)
@@ -207,13 +207,13 @@ class Application(tk.Frame):
                     )
         self.scale_s.pack()
         frm_sat.pack()
-        frm_val = tk.Frame(frame)
-        tk.Label(frm_val, text="light").pack(side=tk.LEFT, padx=8)
-        self.scale_v = tk.Scale(frm_val, variable=self.var_val, command=self.callback, orient=tk.HORIZONTAL, 
+        frm_lit = tk.Frame(frame)
+        tk.Label(frm_lit, text="light").pack(side=tk.LEFT, padx=8)
+        self.scale_v = tk.Scale(frm_lit, variable=self.var_lit, command=self.callback, orient=tk.HORIZONTAL, 
                     length=360, width=8, sliderlength=8, from_=0, to=100, resolution=1, tickinterval=50
                     )
         self.scale_v.pack()
-        frm_val.pack()
+        frm_lit.pack()
 
 
     def create_matrix(self, frame, hue):
@@ -232,7 +232,7 @@ class Application(tk.Frame):
 
         self.matrix = [[] for _ in range(11)]
         for i in range(11):
-            val = i*10
+            lit = i*10
             frm = tk.Frame(frame)
             frm.pack()
             ylim = tk.Canvas(frm, width=37, height=27)
@@ -240,7 +240,7 @@ class Application(tk.Frame):
             ylim.pack(padx=3, pady=3, side=tk.LEFT)
             for j in range(11):
                 sat = j*10
-                hsl = hue, sat, val
+                hsl = hue, sat, lit
                 canvas = tk.Canvas(frm, width=27, height=27, bg=hsl2hex(hsl))
                 canvas.pack(padx=3, pady=3, side=tk.LEFT)
                 self.matrix[i].append(canvas)
@@ -252,8 +252,8 @@ class Application(tk.Frame):
                 self.matrix[i][j].delete("mark")
                 self.matrix[i][j].config(bg=hsl2hex(hsl))
 
-    def mark_matrix(self, sat, val):
-        i = int(val/10)
+    def mark_matrix(self, sat, lit):
+        i = int(lit/10)
         j = int(sat/10)
         this_color = self.matrix[i][j].cget("bg")
         self.matrix[i][j].config(bg="black")
