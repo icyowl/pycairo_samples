@@ -10,11 +10,12 @@ def lSysGenerate(s, order):
 def lSysCompute(s):
     # d = {'F': 'F-F++F-F'}
     d = {"F": "F[+F]F[-F]F"}
+    d = {"F": "F[+F]F[-F][F]"}
+    d = {"F": "F[+F]F[-F]F"}
     return ''.join([d.get(c) or c for c in s])
 
 def draw(t, s, length, angle):
     stack = deque()
-    t.left(90)
     for c in s:
         if c in string.ascii_letters:
             t.forward(length)
@@ -37,18 +38,21 @@ def main():
     t = turtle.Turtle()
     wn = turtle.Screen()
     wn.bgcolor('black')
-
     t.color('lightgreen')
+    # t.shape("turtle")
+    t.hideturtle()
+
+    t.left(90)
     t.pensize(1)
     t.penup()
-    t.setpos(0, -250)
+    t.setpos(0, -390)
     t.pendown()
     t.speed(0)
 
     axiom = 'F'
-    length = 10
-    angle = 30
-    iterations = 3
+    length = 3.8
+    angle = 25.7
+    iterations = 5
 
     draw(t, lSysGenerate(axiom, iterations), length, angle)
 
