@@ -16,7 +16,7 @@ def lSysCompute(s):
         "X": "F[+F][-F]FX",
         "F": "FF"
     }
-    # d = {"F": "F[+F]F[-F]F"}
+    d = {"F": "F[+F]F[-F]F"}
     return ''.join([d.get(c) or c for c in s])
 
 def draw(t, s, length, angle):
@@ -53,10 +53,10 @@ def main():
     t.pendown()
     t.speed(0)
 
-    axiom = 'X'
-    length = 5
+    axiom = 'F'
+    length = 3
     angle = 25.7
-    iterations = 5
+    iterations = 4
 
     s = lSysGenerate(axiom, iterations)
     draw(t, s, length, angle)
