@@ -17,6 +17,10 @@ def lSysCompute(s):
         "F": "FF"
     }
     d = {"F": "F[+F]F[-F]F"}
+    d = {
+        "X": "F[+X]F[-X]+X",
+        "F": "FF"
+    }
     return ''.join([d.get(c) or c for c in s])
 
 def draw(t, s, length, angle):
@@ -42,6 +46,7 @@ def draw(t, s, length, angle):
 def main():
     t = turtle.Turtle()
     wn = turtle.Screen()
+    wn.setup(width=512, height=512)
     wn.bgcolor('black')
     t.color('lightgreen')
     t.hideturtle()
@@ -49,14 +54,14 @@ def main():
     t.left(90)
     t.pensize(1)
     t.penup()
-    t.setpos(0, -300)
+    t.setpos(0, -200)
     t.pendown()
-    t.speed(0)
+    t.speed(0) # fastest
 
-    axiom = 'F'
-    length = 3
-    angle = 25.7
-    iterations = 4
+    axiom = "X"
+    length = 6
+    angle = 24.7
+    iterations = 5
 
     s = lSysGenerate(axiom, iterations)
     draw(t, s, length, angle)
