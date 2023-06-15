@@ -95,7 +95,7 @@ def draw(s, length, angle):
 axiom = "X"
 length = 6
 angle = 20
-iterations = 5
+iterations = 4
 
 s = lSysGenerate(axiom, iterations)
 # print(s[:5])
