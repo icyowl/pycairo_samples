@@ -7,7 +7,6 @@ import tkinter as tk
 
 
 WIDTH, HEIGHT = 512, 512 
-
 surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, WIDTH, HEIGHT)
 ctx = cairo.Context(surface)
 
@@ -106,7 +105,7 @@ if __name__ == "__main__":
 
     axiom = "X"
     length = 5
-    angle = 25
+    angle = 25.7
     iterations = 5
     rule = {
         "X": "F[+X]F[-X]+X",
