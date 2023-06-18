@@ -2,7 +2,13 @@ import math
 import matplotlib.pyplot as plt 
 import string
 
-fig, ax = plt.subplots(figsize=(4, 4))
+fig = plt.figure(figsize=(4, 12))
+ax = fig.add_subplot(3, 1, 1)
+ax2 = fig.add_subplot(3, 1, 2)
+ax3 = fig.add_subplot(3, 1, 3)
+
+
+# fig, ax = plt.subplots(figsize=(4, 4))
 ax.set_xlim([0, 512])
 ax.set_ylim([0, 512])
 ax.axis("off")
@@ -13,10 +19,11 @@ stack = []
 def forward(length):
     global theta, x, y
     rad = math.radians(theta)
-    pre_x, pre_y = x, y
-    x += math.cos(rad) * length
-    y += math.sin(rad) * length
-    ax.arrow(pre_x, pre_y, x-pre_x, y-pre_y)
+    dx = math.cos(rad) * length
+    dy = math.sin(rad) * length
+    ax.arrow(x, y, dx, dy)
+    x += dx
+    y += dy
 
 def left(length, angle):
     global theta
