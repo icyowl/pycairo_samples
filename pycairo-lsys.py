@@ -53,7 +53,7 @@ class Draw512:
         
         return self.surface
 
-def tkview(surface):
+def view(surface):
     root = tk.Tk()
     root.title("L-system")
     cimg = Image.frombuffer("RGBA", 
@@ -90,4 +90,4 @@ if __name__ == "__main__":
     s = lSysGenerate(axiom, rule, iterations)
     draw = Draw512(initial_angle=90, initial_x=256, initial_y=480)
     surface = draw.draw(s, length, angle)
-    tkview(surface)
+    view(surface)

@@ -75,7 +75,7 @@ class Lsys1:
         dx = math.cos(rad) * length
         dy = math.sin(rad) * length
         if g == "lean":
-            rad = math.radians(self.theta+27)
+            rad = math.radians(self.theta+21)
             dx = math.cos(rad) * length * 1.1
             dy = math.sin(rad) * length * 1.1
         if f == "short":
