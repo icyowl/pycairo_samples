@@ -1,5 +1,6 @@
 import math
 import matplotlib.pyplot as plt 
+import random
 import string
 
 # fig, ax = plt.subplots(figsize=(4, 4))
@@ -68,29 +69,38 @@ class Lsys1:
         self.y = 0
         self.stack = []
 
-    def forward(self, length, color):
+    def forward(self, length, f, g):
+        color = None
         rad = math.radians(self.theta)
-        # if color == "green":
-        #     dx = math.cos(rad) * length * 2
-        #     dy = math.sin(rad) * length * 2
-        # else:
         dx = math.cos(rad) * length
         dy = math.sin(rad) * length
-        if color == "purple":
-            dx = dx/3
-            dy = dy/3
-        if color != "red":
+        if g == "lean":
+            rad = math.radians(self.theta+27)
+            dx = math.cos(rad) * length * 1.1
+            dy = math.sin(rad) * length * 1.1
+        if f == "short":
+            color = "green"
+            dx = math.cos(rad) * length / 6
+            dy = math.sin(rad) * length / 6
+        if f == "long":
+            color = "gray"
+            rad = math.radians(self.theta+(0.5-random.random())*20)
+            dx = math.cos(rad) * length * 4
+            dy = math.sin(rad) * length * 4
+        if f == "tip":
+            pass
+        else:
             self.ax.arrow(self.x, self.y, dx, dy, edgecolor=color)
         self.x += dx
         self.y += dy
 
-    def left(self, length, angle, color):
+    def left(self, length, angle, f, g):
         self.theta += angle
-        self.forward(length, color)
+        self.forward(length, f, g)
 
-    def right(self, length, angle, color):
+    def right(self, length, angle, f, g):
         self.theta -= angle
-        self.forward(length, color)
+        self.forward(length, f, g)
 
     def append(self):
         self.stack.append((self.theta, (self.x, self.y)))
@@ -100,21 +110,28 @@ class Lsys1:
 
     def draw(self, s, length, angle):
         for i, c in enumerate(s):
-            color = None
-            if i < len(s) - 2:
+            f, g = "", ""
+            if i >= len(s) - 2:
+                f = "tip"
+            else:
                 if s[i+1] == "]" or s[i+2] == "]":
-                    color = "red"
-            # if i < len(s) - 4:
-            #     if s[i+4] == "]":
-            #         color = "green"
+                    f = "tip"
+            if i < len(s) - 4:
+                if s[i+4] == "]" and s[i+1] == "[":
+                    if s[i+2] == "-":
+                        f = "tip"
+                    else:
+                        f = "long"
             if 510 < i and i < 526:
-                color = "purple"
+                f = "short"
+            if 1020 <= i:
+                g = "lean"
             if c in string.ascii_letters:
-                self.forward(length, color)
+                self.forward(length, f, g)
             elif c == '-':
-                self.left(length, angle, color)
+                self.left(length, angle, f, g)
             elif c == '+':
-                self.right(length, angle, color)
+                self.right(length, angle, f, g)
             elif c == "[":
                 self.append()
             elif c == "]":
