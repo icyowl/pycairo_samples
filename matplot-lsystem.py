@@ -2,13 +2,13 @@ import math
 import matplotlib.pyplot as plt 
 import string
 
-fig = plt.figure(figsize=(4, 12))
-ax = fig.add_subplot(3, 1, 1)
-ax2 = fig.add_subplot(3, 1, 2)
-ax3 = fig.add_subplot(3, 1, 3)
+# fig = plt.figure(figsize=(4, 12))
+# ax = fig.add_subplot(3, 1, 1)
+# ax2 = fig.add_subplot(3, 1, 2)
+# ax3 = fig.add_subplot(3, 1, 3)
 
 
-# fig, ax = plt.subplots(figsize=(4, 4))
+fig, ax = plt.subplots(figsize=(4, 4))
 ax.set_xlim([0, 512])
 ax.set_ylim([0, 512])
 ax.axis("off")
@@ -75,12 +75,14 @@ def lSysGenerate(s, d, order):
 if __name__ == "__main__":
 
     axiom = "X"
-    length = 7
+    length = 5
     angle = 25.7
     iterations = 5
     rule = {
-        "X": "F[+X]F[-X]+X",
-        "F": "FF",
+        # "X": "F[+X]F[-X]+X",
+        # "F": "FF",
+        "X": "F[+X]-X",
+        "F": "FF"
     }
     s = lSysGenerate(axiom, rule, iterations)
     draw(s, length, angle)

@@ -15,55 +15,110 @@ class Draw512:
         self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, w, h)
         self.ctx = cairo.Context(self.surface)
         self.ctx.move_to(self.x, self.y)
+        self.w = 3
 
     def forward(self, length, opt1, opt2):
+        theta = self.angle
+        dx, dy = 0, 0
         if opt1 == "lean":
             if not opt2 == "long":
-                rad = math.radians(self.angle+21)
-                self.x += math.cos(rad) * length * 1.1
-                self.y -= math.sin(rad) * length * 1.1
+                theta = self.angle+21
+                rad = math.radians(theta)
+                dx = math.cos(rad) * length * 1.1
+                dy = -math.sin(rad) * length * 1.1
             else:
-                rad = math.radians(self.angle+21+(0.5-random.random())*20)
-                self.x += math.cos(rad) * length * 4
-                self.y -= math.sin(rad) * length * 4
+                theta = self.angle+21+(0.5-random.random())*20
+                rad = math.radians(theta)
+                dx = math.cos(rad) * length * 4
+                dy = -math.sin(rad) * length * 4
                 self.ctx.set_source_rgba(128/256,128/256,128/256,1)
         elif opt1 == "long":
             rad = math.radians(self.angle)
-            self.x += math.cos(rad) * length * 4
-            self.y -= math.sin(rad) * length * 4
+            dx = math.cos(rad) * length * 4
+            dy = -math.sin(rad) * length * 4
         else:
             if not opt2:
                 rad = math.radians(self.angle)
-                self.x += math.cos(rad) * length 
-                self.y -= math.sin(rad) * length 
+                dx = math.cos(rad) * length 
+                dy = -math.sin(rad) * length 
             elif opt2 == "short":
                 rad = math.radians(self.angle)
-                self.x += math.cos(rad) * length / 6
-                self.y -= math.sin(rad) * length / 6
+                dx = math.cos(rad) * length / 6
+                dy = -math.sin(rad) * length / 6
             elif opt2 == "long":
-                rad = math.radians(self.angle+(0.5-random.random())*20)
-                self.x += math.cos(rad) * length * 4
-                self.y -= math.sin(rad) * length * 4
+                theta = self.angle+(0.5-random.random())*20
+                rad = math.radians(theta)
+                dx = math.cos(rad) * length * 4
+                dy = -math.sin(rad) * length * 4
                 self.ctx.set_source_rgba(128/256,128/256,128/256,1)
-        if not opt2 == "tip":
-            self.ctx.line_to(self.x, self.y)
+        if opt2 == "tip":
+            pass
+        else:
+            rad = math.radians(90-theta)
+            x0 = self.x + math.cos(rad) * self.w 
+            y0 = self.y + math.sin(rad) * self.w    
+            x1 = self.x - math.cos(rad) * self.w 
+            y1 = self.y - math.sin(rad) * self.w    
+            x2 = self.x + dx - math.cos(rad) * self.w 
+            y2 = self.y + dy - math.sin(rad) * self.w    
+            x3 = self.x + dx + math.cos(rad) * self.w 
+            y3 = self.y + dy + math.sin(rad) * self.w    
+
+            self.ctx.move_to(x0, y0)
+            self.ctx.line_to(x1, y1)
+            self.ctx.line_to(x2, y2)
+            self.ctx.line_to(x3, y3)
+            self.ctx.line_to(x0, y0)
+            self.ctx.fill_preserve()
+            # self.ctx.line_to(self.x + dx, self.y + dy)
             self.ctx.stroke()
             self.ctx.set_source_rgba(0,0,0,1)
+        self.x += dx
+        self.y += dy
         self.ctx.move_to(self.x, self.y)
+
+
+
+
+    # rad = math.radians(90-theta)
+    # x0 = pre_x + math.cos(rad) * w 
+    # y0 = pre_y + math.sin(rad) * w    
+    # x1 = pre_x - math.cos(rad) * w 
+    # y1 = pre_y - math.sin(rad) * w    
+    # x2 = x - math.cos(rad) * w 
+    # y2 = y - math.sin(rad) * w    
+    # x3 = x + math.cos(rad) * w 
+    # y3 = y + math.sin(rad) * w    
+
+    # ctx.move_to(x0, y0)
+    # ctx.line_to(x1, y1)
+    # ctx.line_to(x2, y2)
+    # ctx.line_to(x3, y3)
+    # ctx.line_to(x0, y0)
+    # # ctx.close_path()
+    # # ctx.set_source_rgba(0, 0, 0, 1)
+    # ctx.fill_preserve()
+    # ctx.stroke()
+    # ctx.move_to(x, y)
+
 
     def left(self, length, angle, opt1, opt2):
         self.angle += angle
+        self.w = self.w / 2
+        self.x = self.x - self.w
         self.forward(length, opt1, opt2)
 
     def right(self, length, angle, opt1, opt2):
         self.angle -= angle
+        self.w = self.w / 2
+        self.x = self.x + self.w
         self.forward(length, opt1, opt2)
 
     def append(self):
-        self.stack.append((self.angle, (self.x, self.y)))
+        self.stack.append((self.angle, self.w, (self.x, self.y)))
 
     def pop(self):
-        self.angle, (self.x, self.y) = self.stack.pop()
+        self.angle, self.w, (self.x, self.y) = self.stack.pop()
         self.ctx.move_to(self.x, self.y)
 
     def draw(self, s, length, angle):
@@ -118,6 +173,9 @@ def lSysGenerate(s, d, order):
     return s
 
 if __name__ == "__main__":
+
+    # https://github.com/pvigier/lsystem *3dplot
+    # https://gpfault.net/posts/generating-trees.txt.html
 
     axiom = "X"
     length = 6

@@ -17,11 +17,16 @@ class Draw512:
 
     def forward(self, length):
         rad = math.radians(self.angle)
-        self.x += math.cos(rad) * length
-        self.y -= math.sin(rad) * length
-        self.ctx.line_to(self.x, self.y)
+        dx = math.cos(rad) * length
+        dy = -math.sin(rad) * length
+        # self.x += math.cos(rad) * length
+        # self.y -= math.sin(rad) * length
+        self.ctx.line_to(self.x + dx, self.y + dy)
         self.ctx.stroke()
-        self.ctx.move_to(self.x, self.y)
+        self.ctx.move_to(self.x + dx, self.y + dy)
+        self.x += dx
+        self.y += dy
+
 
     def left(self, length, angle):
         self.angle += angle
