@@ -175,7 +175,7 @@ def lSysGenerate(s, d, order):
 if __name__ == "__main__":
 
     # https://github.com/pvigier/lsystem *3dplot
-    # https://gpfault.net/posts/generating-trees.txt.html
+    # https://gpfault.net/posts/generating-trees.txt.html *purple
 
     axiom = "X"
     length = 6
