@@ -18,9 +18,9 @@ def plot(s, length, angle, alpha=1, colors={}):
     stack = []
     for i, c in enumerate(s):
         if i == 1:
-            length *= 3
+            length *= 2
         if i == 2:
-            length /= 3
+            length /= 2
         # if c in string.ascii_letters:
         if c in string.ascii_uppercase:
             rad = math.radians(theta)
