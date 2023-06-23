@@ -17,9 +17,9 @@ def plot(s, length, angle, alpha=1, colors={}):
     x, y = 0, 0
     stack = []
     for i, c in enumerate(s):
-        if i == 1:
+        if i == 0:
             length *= 2
-        if i == 2:
+        if i == 1:
             length /= 2
         # if c in string.ascii_letters:
         if c in string.ascii_uppercase:
@@ -55,8 +55,8 @@ if __name__ == "__main__":
     rule = {
         # "X": "F[+X]F[-X]+X",
         # "F": "FF"
-        "X": "gF/[+X]-X*",
+        "X": "F/[g+X]-gX*",
         "g": "k"
     }
     s = lSystem(axiom, rule, iterations)
-    plot(s, length, angle, alpha=1.2, colors={"g": "green", "k": "black"})
+    plot(s, length, angle, alpha=1.2, colors={"g": (0,0,0,0.6), "k": (0,0,0,0.9)})
