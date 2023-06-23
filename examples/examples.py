@@ -50,5 +50,6 @@ def pine3d():
 	plot3d(system.state, 20, 2, np.array([0, 0, 1.]), {'g': 'g', 'b': '#654321'})
 
 if __name__ == '__main__':
-	# tree3d()
-    tree()
+	
+    pine3d()
+    # tree()
