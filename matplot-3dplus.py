@@ -15,49 +15,56 @@ def axis_equal_3d(ax):
     ax.set_ylim(mid_y - rng, mid_y + rng)
     ax.set_zlim(mid_z - rng, mid_z + rng)
 
-def rotate_x(vec, angle):
+def rotate_x(vec, angle, width):
 	rad = np.radians(angle)
 	mtr = [[1, 0, 0], [0, np.cos(rad), -np.sin(rad)], [0, np.sin(rad), np.cos(rad)]]
-	return np.dot(mtr, vec)
+	return np.dot(mtr, vec), width / 1.6
 
-def rotate_y(vec, angle):
+def rotate_y(vec, angle, width):
 	rad = np.radians(angle)
 	mtr = [[np.cos(rad), 0, -np.sin(rad)], [0, 1, 0], [np.sin(rad), 0, np.cos(rad)]]
-	return np.dot(mtr, vec)
+	return np.dot(mtr, vec), width / 1.6
 
 def plot3d(s, angle, alpha=1, colors={}):
     fig = plt.figure(figsize=(4,4))
     ax = fig.add_subplot(111, projection='3d')
     ax.axis("off")
     color = "k"
+    width = 4
     pos = np.zeros(3, dtype=np.float64)
     direction = np.array([0, 0, 1.])
     stack = []
     for i, c in enumerate(s):
+        theta = angle + (np.random.rand() - 0.5) * 12
         if i == 1:
-            direction = direction * 5
+            direction = direction * 7
         if i == 2:
-            direction = direction / 5
+            direction = direction / 7
+        if s[i-1] == "g":
+            tip = 1. + np.random.rand()
+            direction = direction * tip 
+        if s[i-2] == "g":
+            direction = direction / tip
         if c in string.ascii_uppercase:
             new_pos = pos + direction
-            ax.plot([pos[0], new_pos[0]], [pos[1], new_pos[1]], [pos[2], new_pos[2]], c=color)
+            ax.plot([pos[0], new_pos[0]], [pos[1], new_pos[1]], [pos[2], new_pos[2]], linewidth=width, c=color)
             pos = new_pos
         elif c == "+":
-            direction = rotate_x(direction, angle)
+            direction, width = rotate_x(direction, theta, width)
         elif c == "-":
-            direction = rotate_x(direction, -angle)
+            direction, width = rotate_x(direction, -theta, width)
         elif c == "&":
-            direction = rotate_y(direction, angle)
+            direction, width = rotate_y(direction, theta, width)
         elif c == "^":
-            direction = rotate_y(direction, -angle)
+            direction, width = rotate_y(direction, -theta, width)
         elif c == "/":
             direction = direction * alpha
         elif c == "*":
             direction = direction / alpha
         elif c == "[":
-            stack.append((pos, direction))
+            stack.append((pos, direction, width))
         elif c == "]":
-            pos, direction = stack.pop()
+            pos, direction, width = stack.pop()
         elif c in colors:
             color = colors[c]
 
@@ -75,16 +82,8 @@ if __name__ == "__main__":
         "g": "k"
     }
     s = lSystem(axiom, rule, iterations)
+    # print(s)
     ax = plot3d(s, angle, alpha=1.2, colors={"g": (0,0,0,0.3), "k": (0,0,0,0.6)})
     axis_equal_3d(ax)
 
     plt.show()
-
-    # ax.set_xlabel("X")
-    # ax.set_ylabel("Y")
-    # ax.set_zlabel("Z")
-    # X = np.random.rand(100)*10+5
-    # Y = np.random.rand(100)*5+2.5
-    # Z = np.random.rand(100)*50+25
-
-    # ax.scatter(X,Y,Z)
