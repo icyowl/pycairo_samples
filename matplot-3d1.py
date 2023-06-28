@@ -1,10 +1,15 @@
+import matplotlib
+matplotlib.use("TkAgg")
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import numpy as np
 import string
+import tkinter as tk
 
-def lSystem(s, rule, iterations):
-    for _ in range(iterations):
-        s = ''.join([rule.get(c) or c for c in s])
+def lSystem(s, rule, n):
+    f = lambda: np.random.choice(["P1", "P2", "P3"])
+    for _ in range(n):
+        s = ''.join([rule.get(f()) if c == "X" else rule.get(c) or c for c in s])
     return s
 
 def axis_equal_3d(ax):
@@ -17,13 +22,13 @@ def axis_equal_3d(ax):
 
 def rotate_x(vec, angle, width):
 	rad = np.radians(angle)
-	mtr = [[1, 0, 0], [0, np.cos(rad), -np.sin(rad)], [0, np.sin(rad), np.cos(rad)]]
-	return np.dot(mtr, vec), width / 1.6
+	mat = [[1, 0, 0], [0, np.cos(rad), -np.sin(rad)], [0, np.sin(rad), np.cos(rad)]]
+	return np.dot(mat, vec), width / 1.6
 
 def rotate_y(vec, angle, width):
 	rad = np.radians(angle)
-	mtr = [[np.cos(rad), 0, -np.sin(rad)], [0, 1, 0], [np.sin(rad), 0, np.cos(rad)]]
-	return np.dot(mtr, vec), width / 1.6
+	mat = [[np.cos(rad), 0, -np.sin(rad)], [0, 1, 0], [np.sin(rad), 0, np.cos(rad)]]
+	return np.dot(mat, vec), width / 1.6
 
 def plot3d(s, angle, alpha=1, colors={}):
     fig = plt.figure(figsize=(4,4))
@@ -37,9 +42,9 @@ def plot3d(s, angle, alpha=1, colors={}):
     for i, c in enumerate(s):
         theta = angle + (np.random.rand() - 0.5) * 12
         if i == 1:
-            vec = vec * 7
+            vec = vec * 8
         if i == 2:
-            vec = vec / 7
+            vec = vec / 8
         if s[i-1] == "g":
             tip = 1. + np.random.rand()
             vec = vec * tip 
@@ -68,22 +73,32 @@ def plot3d(s, angle, alpha=1, colors={}):
         elif c in colors:
             color = colors[c]
 
-    return ax
+    return fig, ax
 
 if __name__ == "__main__":
     
 
     axiom = "X"
-    length = 10
     angle = 20
-    iterations = 5
+    n = 5
     rule = {
-        "X": "gF/[+X][-X][&X]^X*",
+        "P1": "gF/[+X][-X][&X]^X",
+        "P2": "gF/[+X][&X]^X*",
+        "P3": "gF/[&X][^X]+X",
         "g": "k"
     }
-    s = lSystem(axiom, rule, iterations)
+    s = lSystem(axiom, rule, n)
     # print(s)
-    ax = plot3d(s, angle, alpha=1.2, colors={"g": (0,0,0,0.3), "k": (0,0,0,0.6)})
+    fig, ax = plot3d(s, angle, alpha=1.2, colors={"g": (0,0,0,0.3), "k": (0,0,0,0.6)})
     axis_equal_3d(ax)
 
-    plt.show()
+    plt.savefig("tree.svg")
+
+    root = tk.Tk()
+    canvas = FigureCanvasTkAgg(fig, root)
+    canvas.get_tk_widget().pack()
+    plt.close()
+    root.mainloop()
+    
+
+    
