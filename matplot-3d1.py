@@ -1,15 +1,17 @@
-import matplotlib
-matplotlib.use("TkAgg")
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import numpy as np
 import string
 import tkinter as tk
 
-def lSystem(s, rule, n):
-    f = lambda: np.random.choice(["P1", "P2", "P3"])
-    for _ in range(n):
-        s = ''.join([rule.get(f()) if c == "X" else rule.get(c) or c for c in s])
+# def lSystem(s, rule, n):
+#     f = lambda: np.random.choice(["P1", "P2", "P3"])
+#     for _ in range(n):
+#         s = ''.join([rule.get(f()) if c == "X" else rule.get(c) or c for c in s])
+#     return s
+
+def lSystem(s, rule, iterations):
+    for _ in range(iterations):
+        s = ''.join([rule.get(c) or c for c in s])
     return s
 
 def axis_equal_3d(ax):
@@ -40,16 +42,11 @@ def plot3d(s, angle, alpha=1, colors={}):
     vec = np.array([0, 0, 1.])
     stack = []
     for i, c in enumerate(s):
-        theta = angle + (np.random.rand() - 0.5) * 12
+        theta = angle # + (np.random.rand() - 0.5) * 12
         if i == 1:
-            vec = vec * 8
+            vec = vec * 3
         if i == 2:
-            vec = vec / 8
-        if s[i-1] == "g":
-            tip = 1. + np.random.rand()
-            vec = vec * tip 
-        if s[i-2] == "g":
-            vec = vec / tip
+            vec = vec / 3
         if c in string.ascii_uppercase:
             new_pos = pos + vec
             ax.plot([pos[0], new_pos[0]], [pos[1], new_pos[1]], [pos[2], new_pos[2]], linewidth=width, c=color)
@@ -79,26 +76,20 @@ if __name__ == "__main__":
     
 
     axiom = "X"
-    angle = 20
+    angle = 25.7
     n = 5
     rule = {
-        "P1": "gF/[+X][-X][&X]^X",
-        "P2": "gF/[+X][&X]^X*",
-        "P3": "gF/[&X][^X]+X",
+        # "P1": "gF/[+X][-X][&X]^X",
+        # "P2": "gF/[+X][&X]^X*",
+        # "P3": "gF/[+X][&X]^X*",
+        "X": "gF[+X][-X]",
         "g": "k"
     }
     s = lSystem(axiom, rule, n)
-    # print(s)
-    fig, ax = plot3d(s, angle, alpha=1.2, colors={"g": (0,0,0,0.3), "k": (0,0,0,0.6)})
+    fig, ax = plot3d(s, angle, alpha=1., colors={"g": (0,0,0,0.3), "k": (0,0,0,0.6)})
     axis_equal_3d(ax)
 
-    plt.savefig("tree.svg")
+    plt.show()
 
-    root = tk.Tk()
-    canvas = FigureCanvasTkAgg(fig, root)
-    canvas.get_tk_widget().pack()
-    plt.close()
-    root.mainloop()
-    
 
-    
+
