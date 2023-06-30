@@ -65,7 +65,6 @@ def plot3d(s, angle, alpha=1, colors={}):
 
 if __name__ == "__main__":
     
-
     axiom = "X"
     length = 10
     angle = 20
