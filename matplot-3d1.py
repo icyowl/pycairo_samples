@@ -70,8 +70,6 @@ def plot3d(s, angle, alpha=1, colors={}):
         elif c in colors:
             color = colors[c]
 
-    return fig, ax
-
 if __name__ == "__main__":
     
 
@@ -86,8 +84,7 @@ if __name__ == "__main__":
         "g": "k"
     }
     s = lSystem(axiom, rule, n)
-    fig, ax = plot3d(s, angle, alpha=1., colors={"g": (0,0,0,0.3), "k": (0,0,0,0.6)})
-    axis_equal_3d(ax)
+    plot3d(s, angle, alpha=1., colors={"g": (0,0,0,0.3), "k": (0,0,0,0.6)})
 
     plt.show()
 
