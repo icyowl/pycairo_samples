@@ -30,25 +30,34 @@ class App(tk.Frame):
         super().__init__(master)
         self.master.title("SVGs Viewer")
         
-        upper, lower = tk.Frame(self.master), tk.Frame(self.master)
-        upper.pack()
-        lower.pack()
-        self.frames = [tk.Frame(upper).pack(side=tk.LEFT) for _ in range(3)]
-        self.frames += [tk.Frame(lower).pack(side=tk.LEFT) for _ in range(3)]
+        upper = tk.Frame(self.master)
+        upper.pack(padx=2)
+        lower = tk.Frame(self.master)
+        lower.pack(padx=2)
+        self.frames = []
+        for i in range(6):
+            if i < 3:
+                self.frames.append(tk.Frame(upper))
+                self.frames[i].pack(side=tk.LEFT)
+            else:
+                self.frames.append(tk.Frame(lower))
+                self.frames[i].pack(side=tk.LEFT)
 
-        self.view(self.frames[0])
+        filenames = [f for f in os.listdir("./") if f[-4:] == ".svg"]
+        for i, filename in enumerate(filenames):
+            if i < 6:
+                self.view(self.frames[i], filename)
 
-    def view(self, frame):
-        file = "./tree1.svg"
-        with open(file, "rb") as f:
+    def view(self, frame, filename):
+        with open(filename, "rb") as f:
             buf = f.read()
             buf = cairosvg.svg2png(bytestring=buf)
-            buf = Image.open(io.BytesIO(buf))
-            img = ImageTk.PhotoImage(image=buf)
+            img = Image.open(io.BytesIO(buf))
+            img = ImageTk.PhotoImage(image=img.resize((256, 256)))
         lbl = tk.Label(frame, image=img)
         lbl.image = img
-        lbl.pack()
-
+        lbl.pack(padx=2, pady=2)
+        tk.Label(frame, text=filename).pack()
 
 if __name__ == "__main__":
 
