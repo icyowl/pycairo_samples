@@ -1,11 +1,18 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import string
+import tkinter as tk
 
-def lSystem(s, rule, iterations):
-    for _ in range(iterations):
-        s = ''.join([rule.get(c) or c for c in s])
+def lSystem(s, rule, n):
+    f = lambda: np.random.choice(["P1", "P2", "P3"])
+    for _ in range(n):
+        s = ''.join([rule.get(f()) if c == "X" else rule.get(c) or c for c in s])
     return s
+
+# def lSystem(s, rule, iterations):
+#     for _ in range(iterations):
+#         s = ''.join([rule.get(c) or c for c in s])
+#     return s
 
 def axis_equal_3d(ax):
     a = np.array([getattr(ax, f"get_{dim}lim")() for dim in "xyz"])
@@ -15,75 +22,76 @@ def axis_equal_3d(ax):
     ax.set_ylim(mid_y - rng, mid_y + rng)
     ax.set_zlim(mid_z - rng, mid_z + rng)
 
-def rotate_x(vec, angle):
-	rad = np.radians(angle)
-	mtr = [[1, 0, 0], [0, np.cos(rad), -np.sin(rad)], [0, np.sin(rad), np.cos(rad)]]
-	return np.dot(mtr, vec)
+def rotate_x(vec, angle, width):
+    rad = np.radians(angle)
+    mat = [[1, 0, 0], [0, np.cos(rad), -np.sin(rad)], [0, np.sin(rad), np.cos(rad)]]
+    return np.dot(mat, vec), width / 1.6
 
-def rotate_y(vec, angle):
-	rad = np.radians(angle)
-	mtr = [[np.cos(rad), 0, -np.sin(rad)], [0, 1, 0], [np.sin(rad), 0, np.cos(rad)]]
-	return np.dot(mtr, vec)
+def rotate_y(vec, angle, width):
+    rad = np.radians(angle)
+    mat = [[np.cos(rad), 0, -np.sin(rad)], [0, 1, 0], [np.sin(rad), 0, np.cos(rad)]]
+    return np.dot(mat, vec), width / 1.6
 
 def plot3d(s, angle, alpha=1, colors={}):
     fig = plt.figure(figsize=(4,4))
     ax = fig.add_subplot(111, projection='3d')
-    ax.axis("off")
+    # ax.axis("off")
     color = "k"
+    width = 4
     pos = np.zeros(3, dtype=np.float64)
-    direction = np.array([0, 0, 1.])
+    vec = np.array([0, 0, 1.])
     stack = []
     for i, c in enumerate(s):
-        if i == 1:
-            direction = direction * 5
-        if i == 2:
-            direction = direction / 5
+        theta = angle + (np.random.rand() - 0.5) * 12
+        # if i == 1:
+        #     vec = vec * 3
+        # if i == 2:
+        #     vec = vec / 3
+        if i < len(s)-1:
+            if c in "+-&^" and s[i+1] == "k":
+                theta = 60 + (np.random.rand() - 0.5) * 6
         if c in string.ascii_uppercase:
-            new_pos = pos + direction
-            ax.plot([pos[0], new_pos[0]], [pos[1], new_pos[1]], [pos[2], new_pos[2]], c=color)
+            new_pos = pos + vec
+            ax.plot([pos[0], new_pos[0]], [pos[1], new_pos[1]], [pos[2], new_pos[2]], linewidth=width, c=color)
             pos = new_pos
         elif c == "+":
-            direction = rotate_x(direction, angle)
+            vec, width = rotate_x(vec, theta, width)
         elif c == "-":
-            direction = rotate_x(direction, -angle)
+            vec, width = rotate_x(vec, -theta, width)
         elif c == "&":
-            direction = rotate_y(direction, angle)
+            vec, width = rotate_y(vec, theta, width)
         elif c == "^":
-            direction = rotate_y(direction, -angle)
+            vec, width = rotate_y(vec, -theta, width)
         elif c == "/":
-            direction = direction * alpha
+            vec = vec * alpha
         elif c == "*":
-            direction = direction / alpha
+            vec = vec / alpha
         elif c == "[":
-            stack.append((pos, direction))
+            stack.append((pos, vec, width))
         elif c == "]":
-            pos, direction = stack.pop()
+            pos, vec, width = stack.pop()
         elif c in colors:
             color = colors[c]
 
-    return ax
+    ax.view_init(20, 10)
 
 if __name__ == "__main__":
     
+
     axiom = "X"
-    length = 10
-    angle = 20
-    iterations = 5
+    angle = 27.5
+    n = 4
     rule = {
-        "X": "gF/[+X][-X][&X]^X*",
+        "P1": "gF/[+X][-X][&X]^X*",
+        "P2": "gF/[+X][-X][&X]*",
+        "P3": "gF/[+X][-X][&X]*",
+        # "X": "gF/[+X][-X][&X]^X*",
         "g": "k"
     }
-    s = lSystem(axiom, rule, iterations)
-    ax = plot3d(s, angle, alpha=1.2, colors={"g": (0,0,0,0.3), "k": (0,0,0,0.6)})
-    axis_equal_3d(ax)
+    s = lSystem(axiom, rule, n)
+    plot3d(s, angle, alpha=1.3, colors={"g": (0,0,0,0.6), "k": (0,0,0,0.9)})
 
     plt.show()
 
-    # ax.set_xlabel("X")
-    # ax.set_ylabel("Y")
-    # ax.set_zlabel("Z")
-    # X = np.random.rand(100)*10+5
-    # Y = np.random.rand(100)*5+2.5
-    # Z = np.random.rand(100)*50+25
 
-    # ax.scatter(X,Y,Z)
+

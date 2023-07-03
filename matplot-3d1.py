@@ -35,7 +35,7 @@ def rotate_y(vec, angle, width):
 def plot3d(s, angle, alpha=1, colors={}):
     fig = plt.figure(figsize=(4,4))
     ax = fig.add_subplot(111, projection='3d')
-    # ax.axis("off")
+    ax.axis("off")
     color = "k"
     width = 4
     pos = np.zeros(3, dtype=np.float64)
@@ -43,13 +43,13 @@ def plot3d(s, angle, alpha=1, colors={}):
     stack = []
     for i, c in enumerate(s):
         theta = angle + (np.random.rand() - 0.5) * 12
-        # if i == 1:
-        #     vec = vec * 3
-        # if i == 2:
-        #     vec = vec / 3
+        if i == 1:
+            vec = vec * 12
+        if i == 2:
+            vec = vec / 12
         if i < len(s)-1:
             if c in "+-&^" and s[i+1] == "k":
-                theta = 60 + (np.random.rand() - 0.5) * 6
+                theta = 42 + (np.random.rand() - 0.5) * 6
         if c in string.ascii_uppercase:
             new_pos = pos + vec
             ax.plot([pos[0], new_pos[0]], [pos[1], new_pos[1]], [pos[2], new_pos[2]], linewidth=width, c=color)
@@ -73,17 +73,17 @@ def plot3d(s, angle, alpha=1, colors={}):
         elif c in colors:
             color = colors[c]
 
-    ax.view_init(20, 10)
+    ax.view_init(elev=20, azim=10)
 
 if __name__ == "__main__":
     
 
     axiom = "X"
     angle = 27.5
-    n = 4
+    n = 5
     rule = {
-        "P1": "gF/[+X][-X][&X]^X*",
-        "P2": "gF/[+X][-X][&X]*",
+        "P1": "gF/[+X][-X][&X][^X]^X*",
+        "P2": "gF/[+X][-X][&X]^X*",
         "P3": "gF/[+X][-X][&X]*",
         # "X": "gF/[+X][-X][&X]^X*",
         "g": "k"
@@ -92,6 +92,3 @@ if __name__ == "__main__":
     plot3d(s, angle, alpha=1.3, colors={"g": (0,0,0,0.6), "k": (0,0,0,0.9)})
 
     plt.show()
-
-
-
