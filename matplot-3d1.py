@@ -80,7 +80,14 @@ def plot3d(s, angle, alpha=1, colors={}):
         elif c == "]":
             pos, vec, width = stack.pop()
         elif c in colors:
-            color = colors[c]
+            r, g, b = 69/255, 70/255, 72/255
+            if c == "g":
+                a = np.random.randint(0, 9) * 0.1
+                color = r, g, b, a 
+            else:
+                a = np.random.randint(7, 9) * 0.1
+                color = r, g, b, a 
+                # color = colors[c]
         if c in "+-&^":
             width = width / 1.6
 
@@ -106,7 +113,7 @@ if __name__ == "__main__":
 
     axis_equal_3d(ax)
 
-    plt.savefig("tree1.svg", transparent=True)
+    plt.savefig("tree_.svg", transparent=True)
 
     root = tk.Tk()
     canvas = FigureCanvasTkAgg(fig, root)
