@@ -101,11 +101,12 @@ if __name__ == "__main__":
         "g": "k"
     }
     s = lSystem(axiom, rule, n)
-    fig, ax = plot3d(s, angle, alpha=1.4, colors={"g": (0,0,0,0.6), "k": (0,0,0,0.9)})
+    r, g, b = 69/255, 70/255, 72/255
+    fig, ax = plot3d(s, angle, alpha=1.4, colors={"g": (r,g,b,0.6), "k": (r,g,b,0.9)})
 
     axis_equal_3d(ax)
 
-    plt.savefig("tree1.svg")
+    plt.savefig("tree1.svg", transparent=True)
 
     root = tk.Tk()
     canvas = FigureCanvasTkAgg(fig, root)
