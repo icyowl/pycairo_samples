@@ -11,7 +11,7 @@ import tkinter as tk
 class App(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
-        self.master.title("SVGs Viewer")
+        self.master.title("SVG Viewer")
         
         upper, lower = tk.Frame(self.master), tk.Frame(self.master)
         upper.pack(padx=2)
