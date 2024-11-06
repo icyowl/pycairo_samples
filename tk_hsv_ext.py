@@ -33,7 +33,7 @@ def hex2hsv(code):
 BG_sat, BG_val = 0.0, 98.0
 TXT_sat, TXT_val = 1.0, 99.0
 TXT_sat, TXT_val = 30.0, 30.0
-
+# #2f4c8b
 class Application(tk.Frame):
 
     def __init__(self, master = None):
