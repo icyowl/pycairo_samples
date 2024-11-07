@@ -31,8 +31,8 @@ def rotate_y(vec, angle, width):
 	return np.dot(mat, vec), width / 1.6
 
 def plot3d(s1, s2, angle, alpha=1, beta=1, colors={}):
-    fig = plt.figure(figsize=(4,4))
-    ax = fig.add_subplot(111, projection='3d')
+    fig = plt.figure(figsize=(4, 3), facecolor='ivory')
+    ax = fig.add_subplot(111, projection='3d', facecolor='ivory')
     ax.axis("off")
     color = "k"
     width = 4
@@ -49,7 +49,9 @@ def plot3d(s1, s2, angle, alpha=1, beta=1, colors={}):
             vec = np.array([0, 0, 1.])
             width = 4
             vec = vec * 12
-            color = (0,0,0,0.7)
+            # color = (0,0,0,0.7)
+            # color = (188/256, 143/256, 143/256, 0.7)  # rosy brown
+            color = (139/256, 69/256, 19/256, 0.7)  # saddle brown
         if i == len(s1) + 2:
             vec = vec / 12
         if i == 1:
@@ -123,16 +125,20 @@ if __name__ == "__main__":
     s2 = lSystem(axiom, rule, n)
 
 
-    fig, ax = plot3d(s1, s2, angle, alpha=1.18, beta=1.2, colors={"g": (0,0,0,0.3), "k": (0,0,0,0.6)})
+    # fig, ax = plot3d(s1, s2, angle, alpha=1.18, beta=1.2, colors={"g": (0,0,0,0.3), "k": (0,0,0,0.6)})
+    fig, ax = plot3d(s1, s2, angle, alpha=1.18, beta=1.2, colors={"g": (139/256, 69/256, 19/256, 0.3), "k": (139/256, 69/256, 19/256, 0.6)})
     axis_equal_3d(ax)
 
     ax.view_init(20, 10)
 
-    plt.savefig("tree.svg")
+    plt.savefig('tree.png')
+    # plt.show()
 
-    root = tk.Tk()
-    canvas = FigureCanvasTkAgg(fig, root)
-    canvas.get_tk_widget().pack()
-    plt.close()
-    root.mainloop()
+    # plt.savefig("tree.svg")
+
+    # root = tk.Tk()
+    # canvas = FigureCanvasTkAgg(fig, root)
+    # canvas.get_tk_widget().pack()
+    # plt.close()
+    # root.mainloop()
     
