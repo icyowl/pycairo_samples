@@ -10,13 +10,14 @@ def lSystem(s, rule, n):
     return s
 
 def plot(s, angle):
-    fig = plt.figure(figsize=(4,4), facecolor="white")
-    ax = fig.add_subplot()
+    facecolor = '#dee2e6'  # gray-300
+    color = '#6610f2'  # indigo
+    fig = plt.figure(figsize=(4,3), facecolor=facecolor)
+    ax = fig.add_subplot(facecolor=facecolor)
     ax.set_aspect("equal")
     ax.axis("off")
-    color = "black"
     theta = 0
-    x, y = 0, 0
+    x, y = 5, 15
     stack = deque()
     for i, c in enumerate(s):
         if c in string.ascii_letters:
@@ -35,17 +36,28 @@ def plot(s, angle):
         elif c == "]":
             theta, x, y = stack.pop()
 
-    plt.show()
+    # plt.show()
+    plt.savefig('dragon.png')
 
 if __name__ == "__main__":
 
-    axiom = "F--F--F"
-    # axiom = "F-F-F-F"
-    angle = 60
-    n = 4
+    # axiom = "F--F--F"
+    # # axiom = "F-F-F-F"
+    # angle = 60
+    # n = 4
+    # rule = {
+    #     "F": "F+F--F+F",
+    #     # "F": "FF-F-F-F-FF"
+    # }
+    # s = lSystem(axiom, rule, n)
+    # plot(s, angle)
+
+    axiom = 'A'
+    angle = 90
+    n = 14
     rule = {
-        "F": "F+F--F+F",
-        # "F": "FF-F-F-F-FF"
+        'A': 'A+B+',
+        'B': '-A-B'
     }
     s = lSystem(axiom, rule, n)
     plot(s, angle)
